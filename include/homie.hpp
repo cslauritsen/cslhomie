@@ -5,6 +5,7 @@
 #include <map>
 #include <tuple>
 #include <iostream>
+#include <sstream>
 
 namespace homie
 {
@@ -205,5 +206,12 @@ namespace homie
         void introduce(std::list<Message *> *l);
     };
 
+    template <typename T>
+    std::string to_string(const T &n)
+    {
+        std::ostringstream stm;
+        stm << n;
+        return stm.str();
+    }
 
 }

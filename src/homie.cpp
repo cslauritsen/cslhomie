@@ -158,11 +158,11 @@ namespace homie
     }
     void Property::setValue(float f)
     {
-        value = std::to_string(f);
+        value = to_string(f);
     }
     void Property::setValue(int i)
     {
-        value = std::to_string(i);
+        value = to_string(i);
     }
     void Property::setValue(std::string s)
     {

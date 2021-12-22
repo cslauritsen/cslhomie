@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 using namespace std;
-int main(int argc, char** argv) {
 
+static void test_homie() {
     homie::Device *d = new homie::Device("device123", "My Device");
     d->setIpAddr("192.168.1.39");
 
@@ -47,4 +47,7 @@ int main(int argc, char** argv) {
     delete dht22Node;
     delete doorNode;
     delete d;
+}
+int main(int argc, char** argv) {
+     test();
 }
