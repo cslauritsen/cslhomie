@@ -1,0 +1,5 @@
+*.o
+core*
+*.out
+build
+.*.swp
