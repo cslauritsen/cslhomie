@@ -1,0 +1,21 @@
+author: cslauritsen
+type: lib
+description: Simple Homie model for C++
+version: 0.1.0
+
+sources:
+  - src
+includes:
+  - include
+filesystem:
+  - fs
+config_schema:
+libs:
+
+tags:
+  - c
+  - js
+  - hw
+  - docs:drivers:DHT
+
+manifest_version: 2017-09-29

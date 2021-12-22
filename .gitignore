@@ -3,3 +3,4 @@ core*
 *.out
 build
 .*.swp
+build
