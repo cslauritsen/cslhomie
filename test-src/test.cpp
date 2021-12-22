@@ -49,5 +49,5 @@ static void test_homie() {
     delete d;
 }
 int main(int argc, char** argv) {
-     test();
+     test_homie();
 }
