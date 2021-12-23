@@ -65,7 +65,7 @@ namespace homie
         // remove all colons  (if any)
         str.erase(std::remove(str.begin(), str.end(), ':'), str.end());
         // put them back
-        for (int i = 0; i < str.length(); i += 2)
+        for (std::string::size_type i = 0; i < str.length(); i += 2)
         {
             if (i > 0)
             {
