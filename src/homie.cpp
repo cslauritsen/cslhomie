@@ -213,6 +213,10 @@ namespace homie
     {
         value = s;
     }
+    std::string Property::getValue()
+    {
+        return this->value;
+    }
 
     void Property::introduce(std::list<Message> &l)
     {
