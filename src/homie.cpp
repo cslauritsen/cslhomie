@@ -58,7 +58,7 @@ namespace homie
         nodes[n->getId()] = n;
     }
 
-    std::list<Message> *Device::introduce()
+    std::list<Message> &Device::introduce()
     {
         introductions.clear();
 
@@ -98,9 +98,9 @@ namespace homie
 
         for (auto e : nodes)
         {
-            e.second->introduce(&introductions);
+            e.second->introduce(introductions);
         }
-        return &introductions;
+        return introductions;
     }
 
     Node::Node(Device *d, std::string aid, std::string aname, std::string nodeType)
@@ -125,13 +125,13 @@ namespace homie
         }
     }
 
-    void Node::introduce(std::list<Message> *l)
+    void Node::introduce(std::list<Message> &l)
     {
         // homie/super-car/engine/$name → "Car engine"
         // homie/super-car/engine/$type → "V8"
         // homie/super-car/engine/$properties → "speed,direction,temperature"
-        l->push_back(Message(topicBase + "$name", name));
-        l->push_back(Message(topicBase + "$type", type));
+        l.push_back(Message(topicBase + "$name", name));
+        l.push_back(Message(topicBase + "$type", type));
         std::string propList;
         int i = 0;
         for (auto e : properties)
@@ -140,7 +140,7 @@ namespace homie
                 propList += ',';
             propList += e.first;
         }
-        l->push_back(Message(topicBase + "$properties", propList));
+        l.push_back(Message(topicBase + "$properties", propList));
         for (auto e : properties)
         {
             e.second->introduce(l);
@@ -180,7 +180,7 @@ namespace homie
         value = s;
     }
 
-    void Property::introduce(std::list<Message> *l)
+    void Property::introduce(std::list<Message> &l)
     {
 
         // The validator fails unless there's a value message posted
@@ -193,22 +193,22 @@ namespace homie
         // homie/super-car/engine/temperature/$format → "-20:120"
         if (value.length() > 0)
         {
-            l->push_back(Message(pubTopic, value));
+            l.push_back(Message(pubTopic, value));
         }
         else
         {
-            l->push_back(Message(pubTopic, ""));
+            l.push_back(Message(pubTopic, ""));
         }
-        l->push_back(Message(pubTopic + "/$name", name));
-        l->push_back(Message(pubTopic + "/$settable", settable ? "true" : "false"));
-        l->push_back(Message(pubTopic + "/$datatype", DATA_TYPES[(int)dataType]));
+        l.push_back(Message(pubTopic + "/$name", name));
+        l.push_back(Message(pubTopic + "/$settable", settable ? "true" : "false"));
+        l.push_back(Message(pubTopic + "/$datatype", DATA_TYPES[(int)dataType]));
         if (unit.length() > 0)
         {
-            l->push_back(Message(pubTopic + "/$unit", unit));
+            l.push_back(Message(pubTopic + "/$unit", unit));
         }
         if (format.length() > 0)
         {
-            l->push_back(Message(pubTopic + "/$format", format));
+            l.push_back(Message(pubTopic + "/$format", format));
         }
     }
 

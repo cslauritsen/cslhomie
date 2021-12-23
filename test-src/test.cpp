@@ -31,7 +31,7 @@ static void test_homie() {
     auto relayProp = new homie::Property(doorNode, "relay", "Door Activator", homie::INTEGER, true);
     doorNode->addProperty(relayProp);
 
-    for (auto msg : *d->introduce()) {
+    for (auto msg : d->introduce()) {
         std::cout 
         //<< "[q:" << msg.qos << ",r:" << msg.retained << "] "
         << msg.topic 
