@@ -82,11 +82,11 @@ namespace homie
         std::string getTopicBase() { return topicBase; }
         void addNode(Node* n);
 
-        void setIpAddr(std::string s) { localIp = s; }
-        std::string getIpAddr() { return localIp; }
+        void setLocalIp(std::string s) { localIp = s; }
+        std::string getLocalIp() { return localIp; }
 
-        void setMacAddr(std::string s) { mac = s; }
-        std::string getMacAddr() { return mac; }
+        void setMac(std::string s) { mac = s; }
+        std::string getMac() { return mac; }
 
         /**
          * @brief Define device via homie convention.
@@ -115,6 +115,8 @@ namespace homie
          * @return a list of messages to perform a homie introduction
          */
         std::list<Message>& introduce();
+
+        Message getLwt();
     };
 
     class Node

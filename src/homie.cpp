@@ -103,6 +103,11 @@ namespace homie
         return introductions;
     }
 
+    Message Device::getLwt()
+    {
+        return Message(topicBase + "status", "lost");
+    }
+
     Node::Node(Device *d, std::string aid, std::string aname, std::string nodeType)
     {
         device = d;
