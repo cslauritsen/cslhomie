@@ -85,8 +85,8 @@ namespace homie
         void setLocalIp(std::string s) { localIp = s; }
         std::string getLocalIp() { return localIp; }
 
-        void setMac(std::string s) { mac = s; }
         std::string getMac() { return mac; }
+        void setMac(std::string);
 
         /**
          * @brief Define device via homie convention.

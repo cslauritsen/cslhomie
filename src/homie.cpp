@@ -1,4 +1,5 @@
 #include "homie.hpp"
+#include <algorithm>
 
 namespace homie
 {
@@ -42,7 +43,7 @@ namespace homie
         this->version = aVersion;
         name = aname;
         this->localIp = aLocalIp;
-        this->mac = aMac;
+        this->setMac(aMac);
         topicBase = std::string("homie/") + id + "/";
         extensions.push_back(std::string("org.homie.legacy-firmware:0.1.1:[4.x]"));
         lifecycleState = INIT;
@@ -56,6 +57,24 @@ namespace homie
     void Device::addNode(Node *n)
     {
         nodes[n->getId()] = n;
+    }
+
+    void Device::setMac(std::string str)
+    {
+        std::string tmp;
+        // remove all colons  (if any)
+        str.erase(std::remove(str.begin(), str.end(), ':'), str.end());
+        // put them back
+        for (int i = 0; i < str.length(); i += 2)
+        {
+            if (i > 0)
+            {
+                tmp += ':';
+            }
+            tmp += str[i];
+            tmp += str[i + 1];
+        }
+        this->mac = tmp;
     }
 
     std::list<Message> &Device::introduce()
