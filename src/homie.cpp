@@ -4,7 +4,7 @@ namespace homie
 {
 
     const std::string DEGREE_SYMBOL = "°";
-    const std::string HOMIE_VERSION = "3.0";
+    const std::string HOMIE_VERSION = "4.0";
 
     std::string DATA_TYPES[] = {
         "integer", "string", "float", "percent", "boolean", "enum", "dateTime", "duration"};
@@ -36,11 +36,15 @@ namespace homie
         this->qos = qos;
     }
 
-    Device::Device(std::string aid, std::string aname)
+    Device::Device(std::string aid, std::string aVersion, std::string aname, std::string aLocalIp, std::string aMac)
     {
         id = aid;
+        this->version = aVersion;
         name = aname;
+        this->localIp = aLocalIp;
+        this->mac = aMac;
         topicBase = std::string("homie/") + id + "/";
+        extensions.push_back(std::string("org.homie.legacy-firmware:0.1.1:[4.x]"));
         lifecycleState = INIT;
     }
 
@@ -54,26 +58,31 @@ namespace homie
         nodes[n->getId()] = n;
     }
 
-    void Device::introduce(std::list<Message *> *l)
+    std::list<Message> *Device::introduce()
     {
-        if (!l)
-            return;
-        for (auto e : *l)
-        {
-            delete e;
-        }
-        l->clear();
+        introductions.clear();
 
         int i;
-        l->push_back(new Message(topicBase + "$homie", HOMIE_VERSION));
-        l->push_back(new Message(topicBase + "$name", name));
-        l->push_back(new Message(topicBase + "$state", LIFECYCLE_STATES[(int)lifecycleState]));
-        if (macAddr.length() > 0) {
-            l->push_back(new Message(topicBase + "$mac-addr", macAddr));
+        introductions.push_back(Message(topicBase + "$homie", HOMIE_VERSION));
+        introductions.push_back(Message(topicBase + "$name", name));
+        introductions.push_back(Message(topicBase + "$state", LIFECYCLE_STATES[(int)lifecycleState]));
+
+        std::string exts("");
+        i = 0;
+        for (auto elm : extensions)
+        {
+            if (i++ > 0)
+            {
+                exts += ",";
+            }
+            exts += elm;
         }
-        if (ipAddr.length() > 0) {
-            l->push_back(new Message(topicBase + "$ip-addr", ipAddr));
-        }
+        introductions.push_back(Message(topicBase + "$extensions", exts));
+
+        introductions.push_back(Message(topicBase + "$localip", localIp));
+        introductions.push_back(Message(topicBase + "$mac", mac));
+        introductions.push_back(Message(topicBase + "$fw/name", id + "-firmware"));
+        introductions.push_back(Message(topicBase + "$fw/version", version));
 
         std::string nodeList("");
         i = 0;
@@ -85,12 +94,13 @@ namespace homie
             }
             nodeList += elm.first;
         }
-        l->push_back(new Message(topicBase + "$nodes", nodeList));
+        introductions.push_back(Message(topicBase + "$nodes", nodeList));
 
         for (auto e : nodes)
         {
-            e.second->introduce(l);
+            e.second->introduce(&introductions);
         }
+        return &introductions;
     }
 
     Node::Node(Device *d, std::string aid, std::string aname, std::string nodeType)
@@ -115,13 +125,13 @@ namespace homie
         }
     }
 
-    void Node::introduce(std::list<Message *> *l)
+    void Node::introduce(std::list<Message> *l)
     {
         // homie/super-car/engine/$name → "Car engine"
         // homie/super-car/engine/$type → "V8"
         // homie/super-car/engine/$properties → "speed,direction,temperature"
-        l->push_back(new Message(topicBase + "$name", name));
-        l->push_back(new Message(topicBase + "$type", type));
+        l->push_back(Message(topicBase + "$name", name));
+        l->push_back(Message(topicBase + "$type", type));
         std::string propList;
         int i = 0;
         for (auto e : properties)
@@ -130,8 +140,9 @@ namespace homie
                 propList += ',';
             propList += e.first;
         }
-        l->push_back(new Message(topicBase + "$properties", propList));
-        for (auto e : properties) {
+        l->push_back(Message(topicBase + "$properties", propList));
+        for (auto e : properties)
+        {
             e.second->introduce(l);
         }
     }
@@ -169,27 +180,36 @@ namespace homie
         value = s;
     }
 
-    void Property::introduce(std::list<Message *> *l)
+    void Property::introduce(std::list<Message> *l)
     {
+
+        // The validator fails unless there's a value message posted
+        // before the metadata attributes
+        // homie/super-car/engine/temperature → "21.5"
         // homie/super-car/engine/temperature/$name → "Engine temperature"
         // homie/super-car/engine/temperature/$settable → "false"
         // homie/super-car/engine/temperature/$datatype → "float"
         // homie/super-car/engine/temperature/$unit → "°C"
         // homie/super-car/engine/temperature/$format → "-20:120"
-        // homie/super-car/engine/temperature → "21.5"
-        l->push_back(new Message(pubTopic + "/$name", name));
-        l->push_back(new Message(pubTopic + "/$settable", settable ? "true" : "false"));
-        l->push_back(new Message(pubTopic + "/$datatype", DATA_TYPES[(int)dataType]));
-        if (unit.length() > 0) {
-            l->push_back(new Message(pubTopic + "/$unit", unit));
+        if (value.length() > 0)
+        {
+            l->push_back(Message(pubTopic, value));
         }
-        if (format.length() > 0) {
-            l->push_back(new Message(pubTopic + "/$format", format));
+        else
+        {
+            l->push_back(Message(pubTopic, ""));
         }
-        if (value.length() > 0) {
-            l->push_back(new Message(pubTopic, value));
+        l->push_back(Message(pubTopic + "/$name", name));
+        l->push_back(Message(pubTopic + "/$settable", settable ? "true" : "false"));
+        l->push_back(Message(pubTopic + "/$datatype", DATA_TYPES[(int)dataType]));
+        if (unit.length() > 0)
+        {
+            l->push_back(Message(pubTopic + "/$unit", unit));
+        }
+        if (format.length() > 0)
+        {
+            l->push_back(Message(pubTopic + "/$format", format));
         }
     }
 
 }
-

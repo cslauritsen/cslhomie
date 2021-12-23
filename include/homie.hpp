@@ -68,23 +68,25 @@ namespace homie
         LifecycleState lifecycleState;
         std::map<std::string, Node *> nodes;
         std::list<std::string> extensions;
-        std::string ipAddr;
-        std::string macAddr;
+        std::string localIp;
+        std::string mac;
+        std::string version;
 
         std::string topicBase;
+        std::list<Message> introductions;
 
     public:
-        Device(std::string id, std::string aname);
+        Device(std::string aid, std::string aVersion, std::string aname, std::string aLocalIp, std::string aMac);
         ~Device();
 
         std::string getTopicBase() { return topicBase; }
         void addNode(Node *n);
 
-        void setIpAddr(std::string s) { ipAddr = s; }
-        std::string getIpAddr() { return ipAddr; }
+        void setIpAddr(std::string s) { localIp = s; }
+        std::string getIpAddr() { return localIp; }
 
-        void setMacAddr(std::string s) { macAddr = s; }
-        std::string getMacAddr() { return macAddr; }
+        void setMacAddr(std::string s) { mac = s; }
+        std::string getMacAddr() { return mac; }
 
         /**
          * @brief Define device via homie convention.
@@ -110,9 +112,9 @@ namespace homie
       homie / device123 / mythermostat / temperature / $settable → true
          * </pre>
          *
-         * @return std::list<std::pair<std::string,std::string>>*
+         * @return a list of messages to perform a homie introduction
          */
-        void introduce(std::list<Message *> *l);
+        std::list<Message> *introduce();
     };
 
     class Node
@@ -142,7 +144,7 @@ namespace homie
         std::string getTopicBase() { return topicBase; }
 
         void addProperty(Property *);
-        void introduce(std::list<Message *> *l);
+        void introduce(std::list<Message> *l);
     };
 
     class Property
@@ -188,14 +190,14 @@ namespace homie
         std::string getId() { return id; }
         std::string getName() { return name; }
         std::string getDataTypeString() { return DATA_TYPES[(int)dataType]; }
+        std::string getSubTopic() { return subTopic; }
+        std::string getPubTopic() { return pubTopic; }
 
         void setValue(bool v);
         void setValue(float f);
         void setValue(int i);
         void setValue(std::string s);
         std::string getValue();
-        std::string getPubTopic();
-        std::string getSubTopic();
 
         std::string getUnit() { return unit; };
         void setUnit(std::string s) { unit = s; };
@@ -203,7 +205,7 @@ namespace homie
         bool getRetained() { return retained; }
         void setRetained(bool b) { retained = b; }
 
-        void introduce(std::list<Message *> *l);
+        void introduce(std::list<Message> *l);
     };
 
     template <typename T>

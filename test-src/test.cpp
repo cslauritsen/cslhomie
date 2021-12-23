@@ -4,7 +4,7 @@
 using namespace std;
 
 static void test_homie() {
-    homie::Device *d = new homie::Device("device123", "My Device");
+    homie::Device *d = new homie::Device("device123", "1.2.3", "My Device", "192.168.1.69", "aa:bb:cc:dd:ee:ff");
     d->setIpAddr("192.168.1.39");
 
     homie::Node *dht22Node  = new homie::Node(d, "dht22", "DHT22 Temp/RH Sensor", "DHT22");
@@ -16,7 +16,7 @@ static void test_homie() {
     tempProp->setValue(tempF);
     dht22Node->addProperty(tempProp);
 
-    auto rhProp = new homie::Property(dht22Node, "rh", "Temperature in Fahrenheit", homie::FLOAT, false);
+    auto rhProp = new homie::Property(dht22Node, "rh", "Relative Humidity", homie::FLOAT, false);
     rhProp->setUnit("%");
     float rh = 61.0;
     rhProp->setValue(rh);
@@ -25,21 +25,23 @@ static void test_homie() {
     auto doorNode = new homie::Node(d, "doora", "South Garage Door", "door");
     d->addNode(doorNode);
 
-    auto openProp = new homie::Property(doorNode, "isopen", "Is Door Open", homie::BOOLEAN, false);
+    auto openProp = new homie::Property(doorNode, "isopen", "Door Contact", homie::BOOLEAN, false);
     doorNode->addProperty(openProp);
 
     auto relayProp = new homie::Property(doorNode, "relay", "Door Activator", homie::INTEGER, true);
     doorNode->addProperty(relayProp);
 
-    auto introduction = new std::list<homie::Message *>;
-    d->introduce(introduction);
-    for (auto msg : *introduction) {
-        std::cout << msg->topic 
-        << "[q:" << msg->qos << ",r:" << msg->retained << ']' 
-        << " → " 
-        << msg->payload << std::endl;
+    for (auto msg : *d->introduce()) {
+        std::cout 
+        //<< "[q:" << msg.qos << ",r:" << msg.retained << "] "
+        << msg.topic 
+        //<< " → " 
+        << " " 
+        << msg.payload << std::endl;
     }
-    delete introduction;
+
+    std::cout << "relay cmd topic: " << relayProp->getSubTopic() << std::endl;
+
     delete relayProp;
     delete openProp;
     delete rhProp;
