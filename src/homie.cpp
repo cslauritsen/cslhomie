@@ -171,6 +171,16 @@ namespace homie
         }
     }
 
+    Property* Node::getProperty(std::string nm)
+    {
+        auto search = properties.find(nm);
+        if (search == properties.end()) 
+        {
+            return nullptr;
+        }
+        return search->second;
+    }
+
     Property::Property(Node *anode, std::string aid,
                        std::string aname, DataType aDataType, bool asettable)
     {

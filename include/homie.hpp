@@ -148,6 +148,7 @@ namespace homie
         std::string getTopicBase() { return topicBase; }
 
         void addProperty(Property* p);
+        Property *getProperty(std::string nm);
         void introduce(std::list<Message>& l);
     };
 
@@ -197,6 +198,8 @@ namespace homie
         std::string getSubTopic() { return subTopic; }
         std::string getPubTopic() { return pubTopic; }
 
+        std::string getFormat() { return format; }
+        void setFormat(std::string f) { this->format = f; }
         void setValue(bool v);
         void setValue(float f);
         void setValue(int i);

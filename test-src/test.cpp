@@ -27,8 +27,9 @@ static void test_homie()
     auto doorNode = new homie::Node(d, "doora", "South Garage Door", "door");
     d->addNode(doorNode);
 
-    auto openProp = new homie::Property(doorNode, "isopen", "Door Contact", homie::BOOLEAN, false);
+    auto openProp = new homie::Property(doorNode, "isopen", "Door Contact", homie::ENUM, false);
     doorNode->addProperty(openProp);
+    openProp->setFormat("open,closed");
 
     auto relayProp = new homie::Property(doorNode, "relay", "Door Activator", homie::INTEGER, true);
     doorNode->addProperty(relayProp);
