@@ -50,10 +50,6 @@ namespace homie
         std::string payload;
         int qos;
         bool retained;
-        /*
-        Message(std::string topic, std::string payload);
-        Message(std::string topic, std::string payload, bool retained);
-        */
         Message(std::string topic, std::string payload, bool retained, int qos);
     };
 

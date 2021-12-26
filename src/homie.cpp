@@ -223,14 +223,7 @@ namespace homie
         // homie/super-car/engine/temperature/$datatype → "float"
         // homie/super-car/engine/temperature/$unit → "°C"
         // homie/super-car/engine/temperature/$format → "-20:120"
-        if (value.length() > 0)
-        {
-            l.push_back(Message(pubTopic, value));
-        }
-        else
-        {
-            l.push_back(Message(pubTopic, ""));
-        }
+        l.push_back(Message(pubTopic, value));
         l.push_back(Message(pubTopic + "/$name", name));
         l.push_back(Message(pubTopic + "/$settable", settable ? "true" : "false"));
         l.push_back(Message(pubTopic + "/$datatype", DATA_TYPES[(int)dataType]));
