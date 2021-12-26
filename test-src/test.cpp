@@ -22,7 +22,7 @@ static void introduce_cb(void *arg)
     bool retain = true;
 
     std::cout
-        << "INTRO: "
+        //<< "INTRO: "
         << it->topic
         << " "
         << it->payload
@@ -34,10 +34,13 @@ static void introduce_cb(void *arg)
         auto msg = *it;
         it++;
         pair->second++;
-        std::cout
-            << "  next topic "
-            << msg.topic
-            << std::endl;
+        if (false)
+        {
+            std::cout
+                << "  next topic "
+                << msg.topic
+                << std::endl;
+        }
     }
 }
 

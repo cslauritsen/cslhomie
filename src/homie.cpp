@@ -13,23 +13,7 @@ namespace homie
     std::string LIFECYCLE_STATES[] = {
         "init", "ready", "disconnected", "sleeping", "lost", "alert"};
 
-    Message::Message(std::string topic, std::string payload)
-    {
-        this->topic = topic;
-        this->payload = payload;
-        this->qos = 1;
-        this->retained = true;
-    }
-
-    Message::Message(std::string topic, std::string payload, bool retained)
-    {
-        this->topic = topic;
-        this->payload = payload;
-        this->retained = retained;
-        this->qos = 1;
-    }
-
-    Message::Message(std::string topic, std::string payload, bool retained, int qos)
+    Message::Message(std::string topic, std::string payload, bool retained = true, int qos = 1)
     {
         this->topic = topic;
         this->payload = payload;
@@ -84,7 +68,7 @@ namespace homie
         int i;
         introductions.push_back(Message(topicBase + "$homie", HOMIE_VERSION));
         introductions.push_back(Message(topicBase + "$name", name));
-        introductions.push_back(Message(topicBase + "$state", LIFECYCLE_STATES[(int)lifecycleState]));
+        introductions.push_back(getLifecycleMsg());
 
         std::string exts("");
         i = 0;
@@ -124,7 +108,17 @@ namespace homie
 
     Message Device::getLwt()
     {
-        return Message(topicBase + "status", "lost");
+        return Message(getLifecycleTopic(), LIFECYCLE_STATES[(int)homie::LOST]);
+    }
+
+    std::string Device::getLifecycleTopic()
+    {
+        return topicBase + "$state";
+    }
+
+    Message Device::getLifecycleMsg()
+    {
+        return Message(getLifecycleTopic(), LIFECYCLE_STATES[(int)lifecycleState]);
     }
 
     Node::Node(Device *d, std::string aid, std::string aname, std::string nodeType)
@@ -171,10 +165,10 @@ namespace homie
         }
     }
 
-    Property* Node::getProperty(std::string nm)
+    Property *Node::getProperty(std::string nm)
     {
         auto search = properties.find(nm);
-        if (search == properties.end()) 
+        if (search == properties.end())
         {
             return nullptr;
         }
