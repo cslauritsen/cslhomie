@@ -4,3 +4,4 @@ core*
 build
 .*.swp
 build
+linux64

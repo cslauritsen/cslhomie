@@ -66,7 +66,7 @@ namespace homie
         std::string id;
         std::string name;
         LifecycleState lifecycleState;
-        std::map<std::string, Node*> nodes;
+        std::map<std::string, Node *> nodes;
         std::list<std::string> extensions;
         std::string localIp;
         std::string mac;
@@ -80,13 +80,16 @@ namespace homie
         ~Device();
 
         std::string getTopicBase() { return topicBase; }
-        void addNode(Node* n);
+        void addNode(Node *n);
 
         void setLocalIp(std::string s) { localIp = s; }
         std::string getLocalIp() { return localIp; }
 
         std::string getMac() { return mac; }
         void setMac(std::string);
+
+        LifecycleState getLifecycleState() { return lifecycleState; }
+        void setLifecycleState(LifecycleState lcs) { lifecycleState = lcs; }
 
         /**
          * @brief Define device via homie convention.
@@ -114,7 +117,7 @@ namespace homie
          *
          * @return a list of messages to perform a homie introduction
          */
-        std::list<Message>& introduce();
+        std::list<Message> &introduce();
 
         Message getLwt();
     };
@@ -129,15 +132,15 @@ namespace homie
         /** Required arbitrary string describing the type of node */
         std::string type;
         /** Required list of properties the node exposes */
-        std::map<std::string, Property*> properties;
+        std::map<std::string, Property *> properties;
 
         /** The device owning this node */
-        Device* device;
+        Device *device;
 
         std::string topicBase;
 
     public:
-        Node(Device* d, std::string id, std::string aname, std::string nodeType);
+        Node(Device *d, std::string id, std::string aname, std::string nodeType);
         ~Node();
 
         std::string getId() { return id; }
@@ -147,9 +150,9 @@ namespace homie
 
         std::string getTopicBase() { return topicBase; }
 
-        void addProperty(Property* p);
+        void addProperty(Property *p);
         Property *getProperty(std::string nm);
-        void introduce(std::list<Message>& l);
+        void introduce(std::list<Message> &l);
     };
 
     class Property
@@ -186,10 +189,10 @@ namespace homie
         std::string value;
 
         /** Node owning this property */
-        Node* node;
+        Node *node;
 
     public:
-        Property(Node* anode, std::string id, std::string name, DataType dataType, bool settable);
+        Property(Node *anode, std::string id, std::string name, DataType dataType, bool settable);
         ~Property();
 
         std::string getId() { return id; }

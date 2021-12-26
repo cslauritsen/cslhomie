@@ -1,7 +1,45 @@
 #include "homie.hpp"
 #include <iostream>
 #include <string>
-using namespace std;
+
+static void introduce_cb(void *arg)
+{
+    auto pair = (std::pair<std::list<homie::Message> *, int> *)arg;
+    auto lst = pair->first;
+    auto it = lst->begin();
+    for (int i = 0; it != lst->end() && i < pair->second; i++)
+    {
+        it++;
+    }
+
+    if (it == lst->end())
+    {
+        std::cout << "We done ";
+        return;
+    }
+
+    int qos = 1;
+    bool retain = true;
+
+    std::cout
+        << "INTRO: "
+        << it->topic
+        << " "
+        << it->payload
+        << std::endl;
+    // auto res = mgos_mqtt_pub(it->topic.c_str(), it->payload.c_str(), it->payload.length(), qos, retain);
+    auto res = 1;
+    if (res > 0)
+    {
+        auto msg = *it;
+        it++;
+        pair->second++;
+        std::cout
+            << "  next topic "
+            << msg.topic
+            << std::endl;
+    }
+}
 
 static void test_homie()
 {
@@ -48,12 +86,27 @@ static void test_homie()
     homie::Message lwt = d->getLwt();
     std::cout << "LWT: " << lwt.topic << " " << lwt.payload << std::endl;
 
+    d->setLifecycleState(homie::READY);
+
+    auto msgList = d->introduce();
+    auto pair = new std::pair<
+        std::list<homie::Message> *, int>;
+    pair->first = &msgList;
+    pair->second = 0;
+    // std::make_pair(intro.begin(), intro.end());
+
+    for (int i = 0; i < 100; i++)
+    {
+        introduce_cb(pair);
+    }
+
     delete relayProp;
     delete openProp;
     delete rhProp;
     delete tempProp;
     delete dht22Node;
     delete doorNode;
+    delete pair;
     delete d;
 }
 int main(int argc, char **argv)
