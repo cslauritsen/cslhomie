@@ -58,6 +58,7 @@ namespace homie
             tmp += str[i];
             tmp += str[i + 1];
         }
+        std::cout << "setting mac: " << tmp << std::endl;
         this->mac = tmp;
     }
 
@@ -68,6 +69,8 @@ namespace homie
         int i;
         introductions.push_back(Message(topicBase + "$homie", HOMIE_VERSION));
         introductions.push_back(Message(topicBase + "$name", name));
+        introductions.push_back(Message(topicBase + "$implementation", std::string("cslhomie")));
+        this->setLifecycleState(homie::INIT);
         introductions.push_back(getLifecycleMsg());
 
         std::string exts("");
@@ -103,6 +106,8 @@ namespace homie
         {
             e.second->introduce(introductions);
         }
+        this->setLifecycleState(homie::READY);
+        introductions.push_back(getLifecycleMsg());
         return introductions;
     }
 

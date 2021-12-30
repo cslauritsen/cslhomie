@@ -46,9 +46,9 @@ static void introduce_cb(void *arg)
 
 static void test_homie()
 {
-    homie::Device *d = new homie::Device("device123", "1.2.3", "My Device", "192.168.1.69", "aa:bb:cc:dd:ee:ff");
+    homie::Device *d = new homie::Device("device123", "1.2.3", "My Device", "192.168.1.69", "aabb:cc:dd:ee:ff");
     d->setLocalIp("192.168.1.39");
-    d->setMac("feedfacedeadbeef");
+    //d->setMac("feedfacedeadbeef");
 
     homie::Node *dht22Node = new homie::Node(d, "dht22", "DHT22 Temp/RH Sensor", "DHT22");
     d->addNode(dht22Node);
