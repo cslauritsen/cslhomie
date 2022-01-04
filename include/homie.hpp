@@ -10,7 +10,7 @@
 #ifndef NO_MBEDTLS
 extern "C"
 {
-#include <mbedtls/sha512.h>
+#include <mbedtls/sha256.h>
 }
 #endif
 
