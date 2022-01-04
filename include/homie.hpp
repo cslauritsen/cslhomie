@@ -7,6 +7,10 @@
 #include <iostream>
 #include <sstream>
 
+extern "C" {
+#include <mbedtls/sha512.h>
+}
+
 namespace homie
 {
     class Attribute;
@@ -73,6 +77,8 @@ namespace homie
         std::string topicBase;
         std::list<Message> introductions;
 
+        void computePsk();
+
     public:
         Device(std::string aid, std::string aVersion, std::string aname, std::string aLocalIp, std::string aMac);
         ~Device();
@@ -138,6 +144,8 @@ namespace homie
         Device *device;
 
         std::string topicBase;
+        std::string psk;
+        std::string identity;
 
     public:
         Node(Device *d, std::string id, std::string aname, std::string nodeType);

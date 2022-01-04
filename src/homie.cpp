@@ -21,6 +21,37 @@ namespace homie
         this->qos = qos;
     }
 
+    void Device::computePsk()
+    {
+        unsigned char output[64];
+        int is384 = 0;
+        int rc = mbedtls_sha512_ret(
+            (const unsigned char *)this->topicBase.c_str(),
+            this->topicBase.length(),
+            output,
+            is384);
+        if (0 == rc)
+        {
+            char *hex = (char *)calloc(1, 129);
+            char *p = hex;
+            for (size_t i = 0; i < sizeof(output); i++)
+            {
+                sprintf(p, "%02x", output[i]);
+                p += 2;
+            }
+            this->psk = std::string(static_cast<const char *>(hex));
+            free(hex);
+            #ifndef LL_HOMIE_PSK
+            #define LL_HOMIE_PSK LL_DEBUG
+            #endif 
+            LOG(LL_HOMIE_PSK, ("psk: %s", this->psk.c_str())); 
+        }
+        else
+        {
+            LOG(LL_ERROR, ("SHA512 failed: %d", rc));
+        }
+    }
+
     Device::Device(std::string aid, std::string aVersion, std::string aname, std::string aLocalIp, std::string aMac)
     {
         id = aid;
@@ -29,6 +60,7 @@ namespace homie
         this->localIp = aLocalIp;
         this->setMac(aMac);
         topicBase = std::string("homie/") + id + "/";
+        this->computePsk();
         extensions.push_back(std::string("org.homie.legacy-firmware:0.1.1:[4.x]"));
         lifecycleState = INIT;
     }
