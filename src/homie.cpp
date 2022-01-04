@@ -43,18 +43,15 @@ namespace homie
             }
             this->psk = std::string(static_cast<const char *>(hex));
             free(hex);
-            #ifndef LL_HOMIE_PSK
-            #define LL_HOMIE_PSK LL_DEBUG
-            #endif 
-            LOG(LL_HOMIE_PSK, ("psk: %s", this->psk.c_str())); 
+            std::cerr << "psk " <<  this->psk << std::endl;
         }
         else
         {
-            LOG(LL_ERROR, ("SHA512 failed: %d", rc));
+            std::cerr << "SHA512 failed: " << rc << std::endl;
         }
         #else
             this->psk = id;
-            LOG(LL_INFO, ("psk: %s", this->psk.c_str()));
+            std::cerr << "psk " <<  this->psk << std::endl;
         #endif
     }
 
