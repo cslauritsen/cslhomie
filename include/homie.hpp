@@ -8,7 +8,8 @@
 #include <sstream>
 
 #ifndef NO_MBEDTLS
-extern "C" {
+extern "C"
+{
 #include <mbedtls/sha512.h>
 }
 #endif
@@ -94,6 +95,8 @@ namespace homie
 
         std::string getMac() { return mac; }
         void setMac(std::string);
+
+        std::string getPsk() { return psk; }
 
         LifecycleState getLifecycleState() { return lifecycleState; }
         void setLifecycleState(LifecycleState lcs) { lifecycleState = lcs; }
