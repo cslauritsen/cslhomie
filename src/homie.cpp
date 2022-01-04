@@ -23,9 +23,11 @@ namespace homie
 
     void Device::computePsk()
     {
+        int rc=0;
+        #ifndef NO_MBEDTLS
         unsigned char output[64];
         int is384 = 0;
-        int rc = mbedtls_sha512_ret(
+        rc = mbedtls_sha512_ret(
             (const unsigned char *)this->topicBase.c_str(),
             this->topicBase.length(),
             output,
@@ -50,6 +52,10 @@ namespace homie
         {
             LOG(LL_ERROR, ("SHA512 failed: %d", rc));
         }
+        #else
+            this->psk = id;
+            LOG(LL_INFO, ("psk: %s", this->psk.c_str()));
+        #endif
     }
 
     Device::Device(std::string aid, std::string aVersion, std::string aname, std::string aLocalIp, std::string aMac)

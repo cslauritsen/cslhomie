@@ -7,9 +7,19 @@
 #include <iostream>
 #include <sstream>
 
+#ifndef LOG
+#define LOG(x, y) printf y
+#define LL_INFO 1
+#define LL_WARN 1
+#define LL_ERROR 1
+#define LL_DEBUG 1
+#endif
+
+#ifndef NO_MBEDTLS
 extern "C" {
 #include <mbedtls/sha512.h>
 }
+#endif
 
 namespace homie
 {
@@ -72,6 +82,7 @@ namespace homie
         std::list<std::string> extensions;
         std::string localIp;
         std::string mac;
+        std::string psk;
         std::string version;
 
         std::string topicBase;
