@@ -23,8 +23,8 @@ namespace homie
 
     void Device::computePsk()
     {
-        int rc=0;
-        #ifndef NO_MBEDTLS
+        int rc = 0;
+#ifndef NO_MBEDTLS
         unsigned char output[64];
         int is384 = 0;
         rc = mbedtls_sha512_ret(
@@ -43,16 +43,18 @@ namespace homie
             }
             this->psk = std::string(static_cast<const char *>(hex));
             free(hex);
-            std::cerr << "psk " <<  this->psk << std::endl;
+#ifdef HOMIE_INSECURE
+            std::cerr << "psk " << this->psk << std::endl;
+#endif
         }
         else
         {
             std::cerr << "SHA512 failed: " << rc << std::endl;
         }
-        #else
-            this->psk = id;
-            std::cerr << "psk " <<  this->psk << std::endl;
-        #endif
+#else
+        this->psk = id;
+        std::cerr << "psk " << this->psk << std::endl;
+#endif
     }
 
     Device::Device(std::string aid, std::string aVersion, std::string aname, std::string aLocalIp, std::string aMac)
