@@ -25,16 +25,16 @@ namespace homie
     {
         int rc = 0;
 #ifndef NO_MBEDTLS
-        unsigned char output[32];
-        int is224 = 0;
-        rc = mbedtls_sha256_ret(
+        unsigned char output[64];
+        int is384 = 0;
+        rc = mbedtls_sha512_ret(
             (const unsigned char *)this->topicBase.c_str(),
             this->topicBase.length(),
             output,
-            is224);
+            is384);
         if (0 == rc)
         {
-            char *hex = (char *)calloc(1, sizeof(output)*2 + 1);
+            char *hex = (char *)calloc(1, 129);
             char *p = hex;
             for (size_t i = 0; i < sizeof(output); i++)
             {
