@@ -80,6 +80,11 @@ namespace homie
         nodes[n->getId()] = n;
     }
 
+    Node *Device::getNode(std::string nm)
+    {
+        return nodes[nm];
+    }
+
     void Device::setMac(std::string str)
     {
         std::string tmp;

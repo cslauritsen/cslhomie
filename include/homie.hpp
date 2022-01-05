@@ -89,6 +89,7 @@ namespace homie
 
         std::string getTopicBase() { return topicBase; }
         void addNode(Node *n);
+        Node *getNode(std::string nm);
 
         void setLocalIp(std::string s) { localIp = s; }
         std::string getLocalIp() { return localIp; }
