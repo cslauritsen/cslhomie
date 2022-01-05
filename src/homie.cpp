@@ -180,7 +180,7 @@ namespace homie
         name = aname;
         type = nodeType;
         topicBase = device->getTopicBase() + id + "/";
-        device->nodes[this->id] = this;
+        device->addNode(this);
     }
 
     Node::~Node()
@@ -238,7 +238,7 @@ namespace homie
         settable = asettable;
         pubTopic = node->getTopicBase() + this->id;
         subTopic = node->getTopicBase() + this->id + "/set";
-        node->properties[this->id] = this;
+        node->addProperty(this);
     }
 
     Property::~Property()
