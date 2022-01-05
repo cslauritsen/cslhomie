@@ -82,7 +82,12 @@ namespace homie
 
     Node *Device::getNode(std::string nm)
     {
-        return nodes[nm];
+        auto search = nodes.find(nm);
+        if (search == nodes.end())
+        {
+            return nullptr;
+        }
+        return search->second;
     }
 
     void Device::setMac(std::string str)
@@ -175,6 +180,7 @@ namespace homie
         name = aname;
         type = nodeType;
         topicBase = device->getTopicBase() + id + "/";
+        device->nodes[this->id] = this;
     }
 
     Node::~Node()
@@ -232,6 +238,7 @@ namespace homie
         settable = asettable;
         pubTopic = node->getTopicBase() + this->id;
         subTopic = node->getTopicBase() + this->id + "/set";
+        node->properties[this->id] = this;
     }
 
     Property::~Property()
