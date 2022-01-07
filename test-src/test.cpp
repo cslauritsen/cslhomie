@@ -8,7 +8,7 @@ void homie::Device::computePsk()
     std::cerr << "psk " << this->psk << std::endl;
 }
 
-void homie::Device::publish(Message m)
+void homie::Device::publish(Message &m)
 {
     std::cout
         << "Publish topic="

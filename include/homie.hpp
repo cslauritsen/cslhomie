@@ -80,12 +80,11 @@ namespace homie
 
         std::string topicBase;
 
-
     public:
         Device(std::string aid, std::string aVersion, std::string aname, std::string aLocalIp, std::string aMac);
         ~Device();
 
-        virtual void publish(Message);
+        virtual void publish(Message &);
         virtual void computePsk();
 
         std::string getTopicBase() { return topicBase; }
