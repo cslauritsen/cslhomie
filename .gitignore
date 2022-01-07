@@ -5,3 +5,4 @@ build
 .*.swp
 build
 linux64
+macos

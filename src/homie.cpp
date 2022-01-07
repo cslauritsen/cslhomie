@@ -109,16 +109,16 @@ namespace homie
         this->mac = tmp;
     }
 
-    std::list<Message> &Device::introduce()
+    void Device::introduce(std::vector<Message> *introductions)
     {
-        introductions.clear();
+        introductions->clear();
 
         int i;
-        introductions.push_back(Message(topicBase + "$homie", HOMIE_VERSION));
-        introductions.push_back(Message(topicBase + "$name", name));
-        introductions.push_back(Message(topicBase + "$implementation", std::string("cslhomie")));
+        introductions->push_back(Message(topicBase + "$homie", HOMIE_VERSION));
+        introductions->push_back(Message(topicBase + "$name", name));
+        introductions->push_back(Message(topicBase + "$implementation", std::string("cslhomie")));
         this->setLifecycleState(homie::INIT);
-        introductions.push_back(getLifecycleMsg());
+        introductions->push_back(getLifecycleMsg());
 
         std::string exts("");
         i = 0;
@@ -130,12 +130,12 @@ namespace homie
             }
             exts += elm;
         }
-        introductions.push_back(Message(topicBase + "$extensions", exts));
+        introductions->push_back(Message(topicBase + "$extensions", exts));
 
-        introductions.push_back(Message(topicBase + "$localip", localIp));
-        introductions.push_back(Message(topicBase + "$mac", mac));
-        introductions.push_back(Message(topicBase + "$fw/name", id + "-firmware"));
-        introductions.push_back(Message(topicBase + "$fw/version", version));
+        introductions->push_back(Message(topicBase + "$localip", localIp));
+        introductions->push_back(Message(topicBase + "$mac", mac));
+        introductions->push_back(Message(topicBase + "$fw/name", id + "-firmware"));
+        introductions->push_back(Message(topicBase + "$fw/version", version));
 
         std::string nodeList("");
         i = 0;
@@ -147,15 +147,14 @@ namespace homie
             }
             nodeList += elm.first;
         }
-        introductions.push_back(Message(topicBase + "$nodes", nodeList));
+        introductions->push_back(Message(topicBase + "$nodes", nodeList));
 
         for (auto e : nodes)
         {
             e.second->introduce(introductions);
         }
         this->setLifecycleState(homie::READY);
-        introductions.push_back(getLifecycleMsg());
-        return introductions;
+        introductions->push_back(getLifecycleMsg());
     }
 
     Message Device::getLwt()
@@ -196,13 +195,13 @@ namespace homie
         }
     }
 
-    void Node::introduce(std::list<Message> &l)
+    void Node::introduce(std::vector<Message> *l)
     {
         // homie/super-car/engine/$name → "Car engine"
         // homie/super-car/engine/$type → "V8"
         // homie/super-car/engine/$properties → "speed,direction,temperature"
-        l.push_back(Message(topicBase + "$name", name));
-        l.push_back(Message(topicBase + "$type", type));
+        l->push_back(Message(topicBase + "$name", name));
+        l->push_back(Message(topicBase + "$type", type));
         std::string propList;
         int i = 0;
         for (auto e : properties)
@@ -211,7 +210,7 @@ namespace homie
                 propList += ',';
             propList += e.first;
         }
-        l.push_back(Message(topicBase + "$properties", propList));
+        l->push_back(Message(topicBase + "$properties", propList));
         for (auto e : properties)
         {
             e.second->introduce(l);
@@ -266,7 +265,7 @@ namespace homie
         return this->value;
     }
 
-    void Property::introduce(std::list<Message> &l)
+    void Property::introduce(std::vector<Message> *l)
     {
 
         // The validator fails unless there's a value message posted
@@ -277,17 +276,17 @@ namespace homie
         // homie/super-car/engine/temperature/$datatype → "float"
         // homie/super-car/engine/temperature/$unit → "°C"
         // homie/super-car/engine/temperature/$format → "-20:120"
-        l.push_back(Message(pubTopic, value));
-        l.push_back(Message(pubTopic + "/$name", name));
-        l.push_back(Message(pubTopic + "/$settable", settable ? "true" : "false"));
-        l.push_back(Message(pubTopic + "/$datatype", DATA_TYPES[(int)dataType]));
+        l->push_back(Message(pubTopic, value));
+        l->push_back(Message(pubTopic + "/$name", name));
+        l->push_back(Message(pubTopic + "/$settable", settable ? "true" : "false"));
+        l->push_back(Message(pubTopic + "/$datatype", DATA_TYPES[(int)dataType]));
         if (unit.length() > 0)
         {
-            l.push_back(Message(pubTopic + "/$unit", unit));
+            l->push_back(Message(pubTopic + "/$unit", unit));
         }
         if (format.length() > 0)
         {
-            l.push_back(Message(pubTopic + "/$format", format));
+            l->push_back(Message(pubTopic + "/$format", format));
         }
     }
 

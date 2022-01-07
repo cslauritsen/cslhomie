@@ -4,7 +4,7 @@
 
 static void introduce_cb(void *arg)
 {
-    auto pair = (std::pair<std::list<homie::Message> *, int> *)arg;
+    auto pair = (std::pair<std::vector<homie::Message> *, int> *)arg;
     auto lst = pair->first;
     auto it = lst->begin();
     for (int i = 0; it != lst->end() && i < pair->second; i++)
@@ -48,7 +48,7 @@ static void test_homie()
 {
     homie::Device *d = new homie::Device("device123", "1.2.3", "My Device", "192.168.1.69", "aabb:cc:dd:ee:ff");
     d->setLocalIp("192.168.1.39");
-    //d->setMac("feedfacedeadbeef");
+    // d->setMac("feedfacedeadbeef");
 
     homie::Node *dht22Node = new homie::Node(d, "dht22", "DHT22 Temp/RH Sensor", "DHT22");
     d->addNode(dht22Node);
@@ -75,7 +75,9 @@ static void test_homie()
     auto relayProp = new homie::Property(doorNode, "relay", "Door Activator", homie::INTEGER, true);
     doorNode->addProperty(relayProp);
 
-    for (auto msg : d->introduce())
+    auto msgList = new std::vector<homie::Message>;
+    d->introduce(msgList);
+    for (auto msg : *msgList)
     {
         std::cout
             //<< "[q:" << msg.qos << ",r:" << msg.retained << "] "
@@ -91,10 +93,10 @@ static void test_homie()
 
     d->setLifecycleState(homie::READY);
 
-    auto msgList = d->introduce();
+    d->introduce(msgList);
     auto pair = new std::pair<
-        std::list<homie::Message> *, int>;
-    pair->first = &msgList;
+        std::vector<homie::Message> *, int>;
+    pair->first = msgList;
     pair->second = 0;
     // std::make_pair(intro.begin(), intro.end());
 
@@ -111,6 +113,7 @@ static void test_homie()
     delete doorNode;
     delete pair;
     delete d;
+    delete msgList;
 }
 int main(int argc, char **argv)
 {

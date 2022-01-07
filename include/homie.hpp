@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <list>
+#include <vector>
 #include <map>
 #include <tuple>
 #include <iostream>
@@ -72,14 +72,14 @@ namespace homie
         std::string name;
         LifecycleState lifecycleState;
         std::map<std::string, Node *> nodes;
-        std::list<std::string> extensions;
+        std::vector<std::string> extensions;
         std::string localIp;
         std::string mac;
         std::string psk;
         std::string version;
 
         std::string topicBase;
-        std::list<Message> introductions;
+        //std::vector<Message> introductions;
 
         void computePsk();
 
@@ -128,7 +128,7 @@ namespace homie
          *
          * @return a list of messages to perform a homie introduction
          */
-        std::list<Message> &introduce();
+        void introduce(std::vector<Message> *);
 
         std::string getLifecycleTopic();
         Message getLwt();
@@ -167,7 +167,7 @@ namespace homie
 
         void addProperty(Property *p);
         Property *getProperty(std::string nm);
-        void introduce(std::list<Message> &l);
+        void introduce(std::vector<Message> *);
     };
 
     class Property
@@ -230,7 +230,7 @@ namespace homie
         bool getRetained() { return retained; }
         void setRetained(bool b) { retained = b; }
 
-        void introduce(std::list<Message> &l);
+        void introduce(std::vector<Message> *);
     };
 
     template <typename T>
