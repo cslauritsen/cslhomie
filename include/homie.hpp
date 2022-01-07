@@ -79,7 +79,6 @@ namespace homie
         std::string version;
 
         std::string topicBase;
-        //std::vector<Message> introductions;
 
         void computePsk();
 
