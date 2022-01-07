@@ -80,11 +80,13 @@ namespace homie
 
         std::string topicBase;
 
-        void computePsk();
 
     public:
         Device(std::string aid, std::string aVersion, std::string aname, std::string aLocalIp, std::string aMac);
         ~Device();
+
+        virtual void publish(Message);
+        virtual void computePsk();
 
         std::string getTopicBase() { return topicBase; }
         void addNode(Node *n);
@@ -96,7 +98,7 @@ namespace homie
         std::string getMac() { return mac; }
         void setMac(std::string);
 
-        std::string getPsk() { return psk; }
+        std::string &getPsk() { return psk; }
 
         LifecycleState getLifecycleState() { return lifecycleState; }
         void setLifecycleState(LifecycleState lcs) { lifecycleState = lcs; }
@@ -127,7 +129,7 @@ namespace homie
          *
          * @return a list of messages to perform a homie introduction
          */
-        void introduce(std::vector<Message> *);
+        void introduce();
 
         std::string getLifecycleTopic();
         Message getLwt();
@@ -158,6 +160,7 @@ namespace homie
         ~Node();
 
         std::string getId() { return id; }
+        Device *getDevice() { return device; }
 
         std::string getName() { return name; }
         std::string getType() { return type; }
@@ -166,7 +169,7 @@ namespace homie
 
         void addProperty(Property *p);
         Property *getProperty(std::string nm);
-        void introduce(std::vector<Message> *);
+        void introduce();
     };
 
     class Property
@@ -229,7 +232,9 @@ namespace homie
         bool getRetained() { return retained; }
         void setRetained(bool b) { retained = b; }
 
-        void introduce(std::vector<Message> *);
+        Node *getNode() { return node; }
+
+        void introduce();
     };
 
     template <typename T>

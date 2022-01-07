@@ -2,6 +2,24 @@
 #include <iostream>
 #include <string>
 
+void homie::Device::computePsk()
+{
+    this->psk = id;
+    std::cerr << "psk " << this->psk << std::endl;
+}
+
+void homie::Device::publish(Message m)
+{
+    std::cout
+        << "Publish topic="
+        << m.topic
+        << ": "
+        << m.payload
+        << " q=" << m.qos
+        << " r=" << m.retained
+        << std::endl;
+}
+
 static void introduce_cb(void *arg)
 {
     auto pair = (std::pair<std::vector<homie::Message> *, int> *)arg;
@@ -46,7 +64,12 @@ static void introduce_cb(void *arg)
 
 static void test_homie()
 {
-    homie::Device *d = new homie::Device("device123", "1.2.3", "My Device", "192.168.1.69", "aabb:cc:dd:ee:ff");
+    homie::Device *d = new homie::Device(
+        std::string("device123"),
+        std::string("1.2.3"),
+        std::string("My Device"),
+        std::string("192.168.1.69"),
+        std::string("aabb:cc:dd:ee:ff"));
     d->setLocalIp("192.168.1.39");
     // d->setMac("feedfacedeadbeef");
 
@@ -75,17 +98,7 @@ static void test_homie()
     auto relayProp = new homie::Property(doorNode, "relay", "Door Activator", homie::INTEGER, true);
     doorNode->addProperty(relayProp);
 
-    auto msgList = new std::vector<homie::Message>;
-    d->introduce(msgList);
-    for (auto msg : *msgList)
-    {
-        std::cout
-            //<< "[q:" << msg.qos << ",r:" << msg.retained << "] "
-            << msg.topic
-            //<< " → "
-            << " "
-            << msg.payload << std::endl;
-    }
+    d->introduce();
 
     std::cout << "relay cmd topic: " << relayProp->getSubTopic() << std::endl;
     homie::Message lwt = d->getLwt();
@@ -93,17 +106,7 @@ static void test_homie()
 
     d->setLifecycleState(homie::READY);
 
-    d->introduce(msgList);
-    auto pair = new std::pair<
-        std::vector<homie::Message> *, int>;
-    pair->first = msgList;
-    pair->second = 0;
-    // std::make_pair(intro.begin(), intro.end());
-
-    for (int i = 0; i < 100; i++)
-    {
-        introduce_cb(pair);
-    }
+    d->introduce();
 
     delete relayProp;
     delete openProp;
@@ -111,9 +114,7 @@ static void test_homie()
     delete tempProp;
     delete dht22Node;
     delete doorNode;
-    delete pair;
     delete d;
-    delete msgList;
 }
 int main(int argc, char **argv)
 {
