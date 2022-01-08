@@ -84,7 +84,7 @@ namespace homie
         Device(std::string aid, std::string aVersion, std::string aname);
         ~Device();
 
-        virtual void publish(Message &);
+        virtual void publish(Message);
         virtual void computePsk();
 
         std::string getTopicBase() { return topicBase; }

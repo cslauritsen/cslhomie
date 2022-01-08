@@ -8,7 +8,7 @@ void homie::Device::computePsk()
     std::cerr << "psk " << this->psk << std::endl;
 }
 
-void homie::Device::publish(Message &m)
+void homie::Device::publish(Message m)
 {
     std::cout
         << "Publish topic="
@@ -67,9 +67,7 @@ static void test_homie()
     homie::Device *d = new homie::Device(
         std::string("device123"),
         std::string("1.2.3"),
-        std::string("My Device"),
-        std::string("192.168.1.69"),
-        std::string("aabb:cc:dd:ee:ff"));
+        std::string("My Device"));
     d->setLocalIp("192.168.1.39");
     // d->setMac("feedfacedeadbeef");
 

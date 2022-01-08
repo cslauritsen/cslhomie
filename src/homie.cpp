@@ -85,12 +85,11 @@ namespace homie
     {
 
         int i;
-        Message m(topicBase + "$homie", HOMIE_VERSION);
-        this->publish(m);
-        this->publish(m = Message(topicBase + "$name", name));
-        this->publish(m = Message(topicBase + "$implementation", std::string("cslhomie")));
+        this->publish(Message(topicBase + "$homie", HOMIE_VERSION));
+        this->publish(Message(topicBase + "$name", name));
+        this->publish(Message(topicBase + "$implementation", std::string("cslhomie")));
         this->setLifecycleState(homie::INIT);
-        this->publish(m = getLifecycleMsg());
+        this->publish(getLifecycleMsg());
 
         std::string exts("");
         i = 0;
@@ -102,12 +101,12 @@ namespace homie
             }
             exts += elm;
         }
-        this->publish(m = Message(topicBase + "$extensions", exts));
+        this->publish(Message(topicBase + "$extensions", exts));
 
-        this->publish(m = Message(topicBase + "$localip", localIp));
-        this->publish(m = Message(topicBase + "$mac", mac));
-        this->publish(m = Message(topicBase + "$fw/name", id + "-firmware"));
-        this->publish(m = Message(topicBase + "$fw/version", version));
+        this->publish(Message(topicBase + "$localip", localIp));
+        this->publish(Message(topicBase + "$mac", mac));
+        this->publish(Message(topicBase + "$fw/name", id + "-firmware"));
+        this->publish(Message(topicBase + "$fw/version", version));
 
         std::string nodeList("");
         i = 0;
@@ -119,14 +118,14 @@ namespace homie
             }
             nodeList += elm.first;
         }
-        this->publish(m = Message(topicBase + "$nodes", nodeList));
+        this->publish(Message(topicBase + "$nodes", nodeList));
 
         for (auto e : nodes)
         {
             e.second->introduce();
         }
         this->setLifecycleState(homie::READY);
-        this->publish(m = getLifecycleMsg());
+        this->publish(getLifecycleMsg());
     }
 
     Message Device::getLwt()
@@ -172,9 +171,8 @@ namespace homie
         // homie/super-car/engine/$name → "Car engine"
         // homie/super-car/engine/$type → "V8"
         // homie/super-car/engine/$properties → "speed,direction,temperature"
-        Message m(topicBase + "$name", name);
-        this->device->publish(m);
-        this->device->publish(m = Message(topicBase + "$type", type));
+        this->device->publish(Message(topicBase + "$name", name));
+        this->device->publish(Message(topicBase + "$type", type));
         std::string propList;
         int i = 0;
         for (auto e : properties)
@@ -183,7 +181,7 @@ namespace homie
                 propList += ',';
             propList += e.first;
         }
-        this->device->publish(m = Message(topicBase + "$properties", propList));
+        this->device->publish(Message(topicBase + "$properties", propList));
         for (auto e : properties)
         {
             e.second->introduce();
@@ -249,18 +247,17 @@ namespace homie
         // homie/super-car/engine/temperature/$datatype → "float"
         // homie/super-car/engine/temperature/$unit → "°C"
         // homie/super-car/engine/temperature/$format → "-20:120"
-        Message m(pubTopic, value);
-        this->node->getDevice()->publish(m);
-        this->node->getDevice()->publish(m = Message(pubTopic + "/$name", name));
-        this->node->getDevice()->publish(m = Message(pubTopic + "/$settable", settable ? "true" : "false"));
-        this->node->getDevice()->publish(m = Message(pubTopic + "/$datatype", DATA_TYPES[(int)dataType]));
+        this->node->getDevice()->publish(Message(pubTopic, value));
+        this->node->getDevice()->publish(Message(pubTopic + "/$name", name));
+        this->node->getDevice()->publish(Message(pubTopic + "/$settable", settable ? "true" : "false"));
+        this->node->getDevice()->publish(Message(pubTopic + "/$datatype", DATA_TYPES[(int)dataType]));
         if (unit.length() > 0)
         {
-            this->node->getDevice()->publish(m = Message(pubTopic + "/$unit", unit));
+            this->node->getDevice()->publish(Message(pubTopic + "/$unit", unit));
         }
         if (format.length() > 0)
         {
-            this->node->getDevice()->publish(m = Message(pubTopic + "/$format", format));
+            this->node->getDevice()->publish(Message(pubTopic + "/$format", format));
         }
     }
 
