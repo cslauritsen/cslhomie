@@ -256,7 +256,7 @@ namespace homie
         }
     }
 
-    void Property::publish(int qos=1, bool retain=true) {
+    void Property::publish(int qos, bool retain) {
         Message m(this->getPubTopic(), this->getValue(), qos, retain);
         this->node->getDevice()->publish(m);
     }
