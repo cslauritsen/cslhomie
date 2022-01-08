@@ -255,4 +255,9 @@ namespace homie
             this->node->getDevice()->publish(m = Message(pubTopic + "/$format", format));
         }
     }
+
+    void Property::publish(int qos=1, bool retain=true) {
+        Message m(this->getPubTopic(), this->getValue(), qos, retain);
+        this->node->getDevice()->publish(m);
+    }
 }

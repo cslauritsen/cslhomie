@@ -234,6 +234,7 @@ namespace homie
         Node *getNode() { return node; }
 
         void introduce();
+        void publish(int,bool);
     };
 
     template <typename T>
