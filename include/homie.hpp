@@ -81,7 +81,7 @@ namespace homie
         std::string topicBase;
 
     public:
-        Device(std::string aid, std::string aVersion, std::string aname, std::string aLocalIp, std::string aMac);
+        Device(std::string aid, std::string aVersion, std::string aname);
         ~Device();
 
         virtual void publish(Message &);

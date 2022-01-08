@@ -21,13 +21,21 @@ namespace homie
         this->qos = qos;
     }
 
-    Device::Device(std::string aid, std::string aVersion, std::string aname, std::string aLocalIp, std::string aMac)
+    Device::Device(std::string aid, std::string aVersion, std::string aname)
     {
         id = aid;
+
+        // homie (or mqtt?) says that topic elements must be lower-case
+        // do this incase the configurator doesnt know this
+        std::transform(
+            this->id.begin(),
+            this->id.end(),
+            this->id.begin(),
+            [](unsigned char c)
+            { return std::tolower(c); });
+
         this->version = aVersion;
         name = aname;
-        this->localIp = aLocalIp;
-        this->setMac(aMac);
         topicBase = std::string("homie/") + id + "/";
         this->computePsk();
         extensions.push_back(std::string("org.homie.legacy-firmware:0.1.1:[4.x]"));
@@ -256,7 +264,8 @@ namespace homie
         }
     }
 
-    void Property::publish(int qos, bool retain) {
+    void Property::publish(int qos, bool retain)
+    {
         Message m(this->getPubTopic(), this->getValue(), qos, retain);
         this->node->getDevice()->publish(m);
     }
