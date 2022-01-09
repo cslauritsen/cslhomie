@@ -6,3 +6,5 @@ build
 build
 linux64
 macos
+*.zip
+*.a

@@ -7,6 +7,10 @@ namespace homie
     const std::string DEGREE_SYMBOL = "°";
     const std::string HOMIE_VERSION = "4.0";
 
+    const std::string NODE_NM_WIFI = "wifi";
+    const std::string PROP_NM_RSSI = "rssi";
+    const std::string PROP_NM_WIFI_SIGNAL = "signal";
+
     std::string DATA_TYPES[] = {
         "integer", "string", "float", "percent", "boolean", "enum", "dateTime", "duration"};
 
@@ -37,14 +41,26 @@ namespace homie
         this->version = aVersion;
         name = aname;
         topicBase = std::string("homie/") + id + "/";
-        this->computePsk();
         extensions.push_back(std::string("org.homie.legacy-firmware:0.1.1:[4.x]"));
         lifecycleState = INIT;
+
+        this->wifiNode = new Node(this, NODE_NM_WIFI, "WiFi", "WIFI");
+        this->rssiProp = new Property(this->wifiNode, PROP_NM_RSSI, "RSSI", homie::INTEGER, false, [this]()
+                                      { return to_string(this->getRssi()); });
+        this->wifiSignalProp = new Property(this->wifiNode, PROP_NM_WIFI_SIGNAL, "Wifi Signal", homie::INTEGER, false, [this]()
+                                            { return to_string(this->getWifiSignalStrength()); });
+        this->localIpProp = new Property(this->wifiNode, "localip", "Local IP", homie::STRING, false,
+                                         [this]()
+                                         { return this->localIp; });
+        this->macProp = new Property(this->wifiNode, "mac", "MAC Address", homie::STRING, false,
+                                         [this]()
+                                         { return formatMac(this->mac); });
     }
 
-    Device::~Device()
+    void Device::publishWifi()
     {
-        std::cerr << "deleting device " << name << std::endl;
+        this->rssiProp->publish();
+        this->wifiSignalProp->publish();
     }
 
     void Device::addNode(Node *n)
@@ -62,7 +78,7 @@ namespace homie
         return search->second;
     }
 
-    void Device::setMac(std::string str)
+    std::string formatMac(std::string str)
     {
         std::string tmp;
         // remove all colons  (if any)
@@ -77,13 +93,11 @@ namespace homie
             tmp += str[i];
             tmp += str[i + 1];
         }
-        std::cout << "setting mac: " << tmp << std::endl;
-        this->mac = tmp;
+        return tmp;
     }
 
     void Device::introduce()
     {
-
         int i;
         this->publish(Message(topicBase + "$homie", HOMIE_VERSION));
         this->publish(Message(topicBase + "$name", name));
@@ -103,8 +117,8 @@ namespace homie
         }
         this->publish(Message(topicBase + "$extensions", exts));
 
-        this->publish(Message(topicBase + "$localip", localIp));
-        this->publish(Message(topicBase + "$mac", mac));
+        this->publish(Message(topicBase + "$localip", this->localIpProp->valueFunction()));
+        this->publish(Message(topicBase + "$mac", this->macProp->valueFunction()));
         this->publish(Message(topicBase + "$fw/name", id + "-firmware"));
         this->publish(Message(topicBase + "$fw/version", version));
 
@@ -126,6 +140,16 @@ namespace homie
         }
         this->setLifecycleState(homie::READY);
         this->publish(getLifecycleMsg());
+    }
+
+    int Device::getWifiSignalStrength()
+    {
+        auto rssi = getRssi();
+        if (rssi <= -100)
+            return 0;
+        if (rssi >= -50)
+            return 100;
+        return 2 * (rssi + 100);
     }
 
     Message Device::getLwt()
@@ -151,11 +175,6 @@ namespace homie
         type = nodeType;
         topicBase = device->getTopicBase() + id + "/";
         device->addNode(this);
-    }
-
-    Node::~Node()
-    {
-        std::cerr << "deleting node " << id << std::endl;
     }
 
     void Node::addProperty(Property *p)
@@ -199,7 +218,7 @@ namespace homie
     }
 
     Property::Property(Node *anode, std::string aid,
-                       std::string aname, DataType aDataType, bool asettable)
+                       std::string aname, DataType aDataType, bool asettable, std::function<std::string(void)> acquireFunc)
     {
         id = aid;
         name = aname;
@@ -209,31 +228,8 @@ namespace homie
         pubTopic = node->getTopicBase() + this->id;
         subTopic = node->getTopicBase() + this->id + "/set";
         node->addProperty(this);
-    }
-
-    Property::~Property()
-    {
-        std::cerr << "deleting property " << id << std::endl;
-    }
-    void Property::setValue(bool v)
-    {
-        value = v ? "true" : "false";
-    }
-    void Property::setValue(float f)
-    {
-        value = to_string(f);
-    }
-    void Property::setValue(int i)
-    {
-        value = to_string(i);
-    }
-    void Property::setValue(std::string s)
-    {
-        value = s;
-    }
-    std::string Property::getValue()
-    {
-        return this->value;
+        this->retained = true;
+        this->valueFunction = acquireFunc;
     }
 
     void Property::introduce()
@@ -247,7 +243,6 @@ namespace homie
         // homie/super-car/engine/temperature/$datatype → "float"
         // homie/super-car/engine/temperature/$unit → "°C"
         // homie/super-car/engine/temperature/$format → "-20:120"
-        this->node->getDevice()->publish(Message(pubTopic, value));
         this->node->getDevice()->publish(Message(pubTopic + "/$name", name));
         this->node->getDevice()->publish(Message(pubTopic + "/$settable", settable ? "true" : "false"));
         this->node->getDevice()->publish(Message(pubTopic + "/$datatype", DATA_TYPES[(int)dataType]));
@@ -259,11 +254,25 @@ namespace homie
         {
             this->node->getDevice()->publish(Message(pubTopic + "/$format", format));
         }
+        this->publish();
     }
 
-    void Property::publish(int qos, bool retain)
+    void Property::publish(int qos)
     {
-        Message m(this->getPubTopic(), this->getValue(), qos, retain);
+        Message m(this->getPubTopic(), this->valueFunction(), qos, this->retained);
         this->node->getDevice()->publish(m);
+    }
+
+    std::string to_string(bool v)
+    {
+        return std::string(v ? "true" : "false");
+    }
+
+    template <typename T>
+    std::string to_string(const T &t)
+    {
+        std::ostringstream stm;
+        stm << t;
+        return stm.str();
     }
 }

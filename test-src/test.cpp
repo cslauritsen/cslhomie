@@ -1,12 +1,9 @@
 #include "homie.hpp"
 #include <iostream>
 #include <string>
+#include <random>
 
-void homie::Device::computePsk()
-{
-    this->psk = id;
-    std::cerr << "psk " << this->psk << std::endl;
-}
+#include <time.h>
 
 void homie::Device::publish(Message m)
 {
@@ -62,39 +59,32 @@ static void introduce_cb(void *arg)
     }
 }
 
+int homie::Device::getRssi() { return -58; }
+
 static void test_homie()
 {
     homie::Device *d = new homie::Device(
         std::string("device123"),
         std::string("1.2.3"),
         std::string("My Device"));
-    d->setLocalIp("192.168.1.39");
-    // d->setMac("feedfacedeadbeef");
 
     homie::Node *dht22Node = new homie::Node(d, "dht22", "DHT22 Temp/RH Sensor", "DHT22");
-    d->addNode(dht22Node);
 
-    auto tempProp = new homie::Property(dht22Node, "tempf", "Temperature in Fahrenheit", homie::FLOAT, false);
+    auto tempProp = new homie::Property(dht22Node, "tempf", "Temperature in Fahrenheit", homie::FLOAT, false, []()
+                                        { return "72.0"; });
     tempProp->setUnit(homie::DEGREE_SYMBOL + "F");
-    float tempF = 72.0;
-    tempProp->setValue(tempF);
-    dht22Node->addProperty(tempProp);
 
-    auto rhProp = new homie::Property(dht22Node, "rh", "Relative Humidity", homie::FLOAT, false);
+    auto rhProp = new homie::Property(dht22Node, "rh", "Relative Humidity", homie::FLOAT, false, []()
+                                        { return "61.0"; });
     rhProp->setUnit("%");
     float rh = 61.0;
-    rhProp->setValue(rh);
-    dht22Node->addProperty(rhProp);
 
     auto doorNode = new homie::Node(d, "doora", "South Garage Door", "door");
-    d->addNode(doorNode);
 
-    auto openProp = new homie::Property(doorNode, "isopen", "Door Contact", homie::ENUM, false);
-    doorNode->addProperty(openProp);
+    auto openProp = new homie::Property(doorNode, "isopen", "Door Contact", homie::ENUM, false, [](){return "open";});
     openProp->setFormat("open,closed");
 
-    auto relayProp = new homie::Property(doorNode, "relay", "Door Activator", homie::INTEGER, true);
-    doorNode->addProperty(relayProp);
+    auto relayProp = new homie::Property(doorNode, "relay", "Door Activator", homie::INTEGER, true, [](){return "false";});
 
     d->introduce();
 
@@ -104,17 +94,51 @@ static void test_homie()
 
     d->setLifecycleState(homie::READY);
 
+    d->mac = "eeddccbb";
+    d->localIp = "8.8.8.8";
+
     d->introduce();
 
-    delete relayProp;
-    delete openProp;
-    delete rhProp;
-    delete tempProp;
-    delete dht22Node;
-    delete doorNode;
+    d->publishWifi();
+
     delete d;
 }
+
+template <typename T>
+class Wayne
+{
+private:
+    T val;
+
+public:
+    Wayne<T> &operator<<(T t);
+    T getVal() { return val; }
+
+    std::function<T(void)> lambda;
+
+    void call()
+    {
+        *this << lambda();
+    }
+};
+
+template <typename T>
+Wayne<T> &Wayne<T>::operator<<(T t)
+{
+    this->val = t;
+    std::cerr << "setting " << this->val << std::endl;
+    return *this;
+}
+
 int main(int argc, char **argv)
 {
     test_homie();
+    Wayne<time_t> wdbl;
+
+    wdbl << 12;
+    wdbl.lambda = []()
+    { return time(NULL); };
+
+    wdbl.call();
+    std::cout << wdbl.getVal() << std::endl;
 }

@@ -16,13 +16,15 @@ extern "C"
 
 namespace homie
 {
-    class Attribute;
     class Device;
     class Node;
-    class Property;
 
     extern const std::string DEGREE_SYMBOL;
     extern const std::string HOMIE_VERSION;
+
+    extern const std::string NODE_NM_WIFI;
+    extern const std::string PROP_NM_RSSI;
+    extern const std::string PROP_NM_WIFI_SIGNAL;
 
     extern std::string DATA_TYPES[];
     extern std::string LIFECYCLE_STATES[];
@@ -60,47 +62,124 @@ namespace homie
         Message(std::string topic, std::string payload, bool retained, int qos);
     };
 
+    class Property
+    {
+    private:
+        /** a function or lambda to provide values. */
+        std::string pubTopic;
+        std::string subTopic;
+        /** Required unique id of property */
+        std::string id;
+        /** Required friendly name of property */
+        std::string name;
+        /** Required data type of property */
+        DataType dataType;
+
+        /**
+            * @brief  Format:
+
+        For integer and float: Describes a range of payloads e.g. 10:15
+
+        For enum: payload,payload,payload for enumerating all valid payloads.
+
+        For color:
+
+        rgb to provide colors in RGB format e.g. 255,255,0 for yellow.
+        hsv to provide colors in HSV format e.g. 60,100,100 for yellow.
+
+    *
+    */
+        std::string format;
+        bool settable;
+        bool retained;
+        std::string unit;
+        std::string value;
+
+        /** Node owning this property */
+        Node *node;
+
+    public:
+        Property(Node *anode, std::string id, std::string name, DataType dataType, bool settable, std::function<std::string(void)> acquireFunc);
+        virtual ~Property();
+
+        /**
+         * @brief A function that gets ths property's value as a string.
+         *
+         */
+        std::function<std::string(void)> valueFunction;
+
+        std::string getId() { return id; }
+        std::string getName() { return name; }
+        std::string getDataTypeString() { return DATA_TYPES[(int)dataType]; }
+        std::string getSubTopic() { return subTopic; }
+        std::string getPubTopic() { return pubTopic; }
+
+        std::string getValue() { return value; }
+        void setValue(std::string v) { this->value = v; }
+
+        std::string getFormat() { return format; }
+        void setFormat(std::string f) { this->format = f; }
+
+        std::string getUnit() { return unit; };
+        void setUnit(std::string s) { unit = s; };
+
+        bool getRetained() { return retained; }
+        void setRetained(bool b) { retained = b; }
+
+        Node *getNode() { return node; }
+
+        void introduce();
+        void publish(int qos = 1);
+    };
+
     /**
      * @brief  Models a homie device. A homie device has 0 or many nodes, and  has exactly one mqtt connection.
      *
      */
     class Device
     {
-    private:
+    protected:
         // required attributes:
         std::string id;
         std::string name;
         LifecycleState lifecycleState;
         std::map<std::string, Node *> nodes;
         std::vector<std::string> extensions;
-        std::string localIp;
-        std::string mac;
-        std::string psk;
         std::string version;
 
         std::string topicBase;
 
+        Node *wifiNode;
+        Property *rssiProp;
+        Property *wifiSignalProp;
+        Property *localIpProp;
+        Property *macProp;
+
     public:
         Device(std::string aid, std::string aVersion, std::string aname);
-        ~Device();
+        virtual ~Device();
 
         virtual void publish(Message);
-        virtual void computePsk();
 
         std::string getTopicBase() { return topicBase; }
         void addNode(Node *n);
         Node *getNode(std::string nm);
 
-        void setLocalIp(std::string s) { localIp = s; }
-        std::string getLocalIp() { return localIp; }
-
-        std::string getMac() { return mac; }
-        void setMac(std::string);
-
-        std::string &getPsk() { return psk; }
-
         LifecycleState getLifecycleState() { return lifecycleState; }
         void setLifecycleState(LifecycleState lcs) { lifecycleState = lcs; }
+
+        virtual int getRssi();
+        int getWifiSignalStrength();
+
+        void publishWifi();
+
+        /**
+         * @brief  Ask the OS for IP address and MAC address.
+         * Set the mac and localIp properties when found.
+         * This method can optionally do nothing.
+         *
+         */
+        virtual void inquireNetConfig();
 
         /**
          * @brief Define device via homie convention.
@@ -133,6 +212,8 @@ namespace homie
         std::string getLifecycleTopic();
         Message getLwt();
         Message getLifecycleMsg();
+        std::string mac;
+        std::string localIp;
     };
 
     class Node
@@ -156,7 +237,7 @@ namespace homie
 
     public:
         Node(Device *d, std::string id, std::string aname, std::string nodeType);
-        ~Node();
+        virtual ~Node();
 
         std::string getId() { return id; }
         Device *getDevice() { return device; }
@@ -171,77 +252,10 @@ namespace homie
         void introduce();
     };
 
-    class Property
-    {
-    private:
-        std::string pubTopic;
-        std::string subTopic;
-        /** Required unique id of property */
-        std::string id;
-        /** Required friendly name of property */
-        std::string name;
-        /** Required data type of property */
-        DataType dataType;
-
-        /**
-            * @brief  Format:
-
-        For integer and float: Describes a range of payloads e.g. 10:15
-
-        For enum: payload,payload,payload for enumerating all valid payloads.
-
-        For color:
-
-        rgb to provide colors in RGB format e.g. 255,255,0 for yellow.
-        hsv to provide colors in HSV format e.g. 60,100,100 for yellow.
-
-    *
-    */
-        std::string format;
-        bool settable;
-        bool retained;
-        std::string unit;
-
-        std::string value;
-
-        /** Node owning this property */
-        Node *node;
-
-    public:
-        Property(Node *anode, std::string id, std::string name, DataType dataType, bool settable);
-        ~Property();
-
-        std::string getId() { return id; }
-        std::string getName() { return name; }
-        std::string getDataTypeString() { return DATA_TYPES[(int)dataType]; }
-        std::string getSubTopic() { return subTopic; }
-        std::string getPubTopic() { return pubTopic; }
-
-        std::string getFormat() { return format; }
-        void setFormat(std::string f) { this->format = f; }
-        void setValue(bool v);
-        void setValue(float f);
-        void setValue(int i);
-        void setValue(std::string s);
-        std::string getValue();
-
-        std::string getUnit() { return unit; };
-        void setUnit(std::string s) { unit = s; };
-
-        bool getRetained() { return retained; }
-        void setRetained(bool b) { retained = b; }
-
-        Node *getNode() { return node; }
-
-        void introduce();
-        void publish(int qos=1, bool retain=true);
-    };
+    std::string to_string(bool v);
 
     template <typename T>
-    std::string to_string(const T &n)
-    {
-        std::ostringstream stm;
-        stm << n;
-        return stm.str();
-    }
+    std::string to_string(const T &n);
+
+    std::string formatMac(std::string mac);
 }
