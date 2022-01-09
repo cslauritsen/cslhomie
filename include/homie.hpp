@@ -6,6 +6,7 @@
 #include <tuple>
 #include <iostream>
 #include <sstream>
+#include <functional>
 
 #ifndef NO_MBEDTLS
 extern "C"
