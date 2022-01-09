@@ -1,7 +1,7 @@
 author: cslauritsen
 type: lib
 description: Simple Homie model for C++
-version: 1.3.3
+version: 1.3.4
 
 sources:
   - src
