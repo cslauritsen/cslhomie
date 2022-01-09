@@ -103,7 +103,9 @@ namespace homie
         int i;
         this->publish(Message(topicBase + "$homie", HOMIE_VERSION));
         this->publish(Message(topicBase + "$name", name));
-        this->publish(Message(topicBase + "$implementation", std::string("cslhomie")));
+        auto impl = std::string("cslhomie");
+        impl += "-" + homie::LIB_VERSION;
+        this->publish(Message(topicBase + "$implementation", impl));
         this->setLifecycleState(homie::INIT);
         this->publish(getLifecycleMsg());
 
