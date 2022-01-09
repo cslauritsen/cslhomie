@@ -17,7 +17,7 @@ namespace homie
     std::string LIFECYCLE_STATES[] = {
         "init", "ready", "disconnected", "sleeping", "lost", "alert"};
 
-    Message::Message(std::string topic, std::string payload, bool retained = true, int qos = 1)
+    Message::Message(std::string topic, std::string payload, bool retained, int qos)
     {
         this->topic = topic;
         this->payload = payload;

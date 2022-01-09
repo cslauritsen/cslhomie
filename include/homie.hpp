@@ -60,7 +60,7 @@ namespace homie
         std::string payload;
         int qos;
         bool retained;
-        Message(std::string topic, std::string payload, bool retained, int qos);
+        Message(std::string topic, std::string payload, bool retained=true, int qos=1);
     };
 
     class Property
