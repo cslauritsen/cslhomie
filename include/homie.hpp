@@ -265,4 +265,6 @@ namespace homie
     std::string to_string(const T &n);
 
     std::string formatMac(std::string mac);
+
+    float to_fahrenheit(float celsius);
 }

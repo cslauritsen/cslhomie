@@ -275,4 +275,10 @@ namespace homie
         stm << t;
         return stm.str();
     }
+
+    float to_fahrenheit(float celsius) {
+        celsius *= 1.8f;
+        celsius += 32.0f;
+        return celsius;
+    }
 }
