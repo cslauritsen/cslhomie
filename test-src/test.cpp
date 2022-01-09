@@ -107,6 +107,8 @@ static void test_homie()
     d->publishWifi();
 
     delete d;
+
+    std::cout << "This lib version: " << homie::LIB_VERSION << std::endl;
 }
 
 template <typename T>

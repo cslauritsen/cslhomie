@@ -46,6 +46,7 @@ jobs:
         name: Update Files and Commit
         run: |
           find . -name mos.yml | xargs sed -i 's/^version: .*/version: ${{ steps.next_version.outputs.version}}/' 
+          find . -name version.hpp | xargs sed -E -i.bak 's/^(.*)LIB_VERSION.*$/\1LIB_VERSION = "${{ steps.next_version.outputs.version}}";/'
           git commit -am "Set version ${{ steps.next_version.outputs.version}}" || echo Skipping commit
           git push
           echo ::set-output name=sha::$(git rev-parse HEAD)
