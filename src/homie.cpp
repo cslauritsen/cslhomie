@@ -45,16 +45,18 @@ namespace homie
         lifecycleState = INIT;
 
         this->wifiNode = new Node(this, NODE_NM_WIFI, "WiFi", "WIFI");
-        this->rssiProp = new Property(this->wifiNode, PROP_NM_RSSI, "RSSI", homie::INTEGER, false, [this]()
-                                      { return to_string(this->getRssi()); });
-        this->wifiSignalProp = new Property(this->wifiNode, PROP_NM_WIFI_SIGNAL, "Wifi Signal", homie::INTEGER, false, [this]()
-                                            { return to_string(this->getWifiSignalStrength()); });
-        this->localIpProp = new Property(this->wifiNode, "localip", "Local IP", homie::STRING, false,
-                                         [this]()
-                                         { return this->localIp; });
-        this->macProp = new Property(this->wifiNode, "mac", "MAC Address", homie::STRING, false,
-                                         [this]()
-                                         { return formatMac(this->mac); });
+        this->rssiProp = new Property(this->wifiNode, PROP_NM_RSSI, "RSSI", homie::INTEGER, false);
+        this->rssiProp->valueFunction = [this]()
+        { return to_string(this->getRssi()); };
+        this->wifiSignalProp = new Property(this->wifiNode, PROP_NM_WIFI_SIGNAL, "Wifi Signal", homie::INTEGER, false);
+        this->wifiSignalProp->valueFunction = [this]()
+        { return to_string(this->getWifiSignalStrength()); };
+        this->localIpProp = new Property(this->wifiNode, "localip", "Local IP", homie::STRING, false);
+        this->localIpProp->valueFunction = [this]()
+        { return this->localIp; };
+        this->macProp = new Property(this->wifiNode, "mac", "MAC Address", homie::STRING, false);
+        this->macProp->valueFunction = [this]()
+        { return formatMac(this->mac); };
     }
 
     void Device::publishWifi()
@@ -218,7 +220,7 @@ namespace homie
     }
 
     Property::Property(Node *anode, std::string aid,
-                       std::string aname, DataType aDataType, bool asettable, std::function<std::string(void)> acquireFunc)
+                       std::string aname, DataType aDataType, bool asettable)
     {
         id = aid;
         name = aname;
@@ -229,12 +231,10 @@ namespace homie
         subTopic = node->getTopicBase() + this->id + "/set";
         node->addProperty(this);
         this->retained = true;
-        this->valueFunction = acquireFunc;
     }
 
     void Property::introduce()
     {
-
         // The validator fails unless there's a value message posted
         // before the metadata attributes
         // homie/super-car/engine/temperature → "21.5"

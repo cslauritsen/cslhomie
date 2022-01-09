@@ -99,7 +99,7 @@ namespace homie
         Node *node;
 
     public:
-        Property(Node *anode, std::string id, std::string name, DataType dataType, bool settable, std::function<std::string(void)> acquireFunc);
+        Property(Node *anode, std::string id, std::string name, DataType dataType, bool settable);
         virtual ~Property();
 
         /**
@@ -146,6 +146,8 @@ namespace homie
         std::map<std::string, Node *> nodes;
         std::vector<std::string> extensions;
         std::string version;
+        std::string mac;
+        std::string localIp;
 
         std::string topicBase;
 
@@ -160,6 +162,12 @@ namespace homie
         virtual ~Device();
 
         virtual void publish(Message);
+
+        void setLocalIp(std::string s) { this->localIp = s;}
+        std::string getLocalIp() { return this->localIp; }
+
+        void setMac(std::string s) { this->mac = s;}
+        std::string getMac() { return this->mac; }
 
         std::string getTopicBase() { return topicBase; }
         void addNode(Node *n);
@@ -212,8 +220,6 @@ namespace homie
         std::string getLifecycleTopic();
         Message getLwt();
         Message getLifecycleMsg();
-        std::string mac;
-        std::string localIp;
     };
 
     class Node

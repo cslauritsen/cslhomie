@@ -70,21 +70,26 @@ static void test_homie()
 
     homie::Node *dht22Node = new homie::Node(d, "dht22", "DHT22 Temp/RH Sensor", "DHT22");
 
-    auto tempProp = new homie::Property(dht22Node, "tempf", "Temperature in Fahrenheit", homie::FLOAT, false, []()
-                                        { return "72.0"; });
+    auto tempProp = new homie::Property(dht22Node, "tempf", "Temperature in Fahrenheit", homie::FLOAT, false);
+    tempProp->valueFunction = []()
+    { return "72.0"; };
     tempProp->setUnit(homie::DEGREE_SYMBOL + "F");
 
-    auto rhProp = new homie::Property(dht22Node, "rh", "Relative Humidity", homie::FLOAT, false, []()
-                                        { return "61.0"; });
+    auto rhProp = new homie::Property(dht22Node, "rh", "Relative Humidity", homie::FLOAT, false);
+    rhProp->valueFunction = []()
+    { return "61.0"; };
     rhProp->setUnit("%");
-    float rh = 61.0;
 
     auto doorNode = new homie::Node(d, "doora", "South Garage Door", "door");
 
-    auto openProp = new homie::Property(doorNode, "isopen", "Door Contact", homie::ENUM, false, [](){return "open";});
+    auto openProp = new homie::Property(doorNode, "isopen", "Door Contact", homie::ENUM, false);
+    openProp->valueFunction = []()
+    { return "open"; };
     openProp->setFormat("open,closed");
 
-    auto relayProp = new homie::Property(doorNode, "relay", "Door Activator", homie::INTEGER, true, [](){return "false";});
+    auto relayProp = new homie::Property(doorNode, "relay", "Door Activator", homie::INTEGER, true);
+    relayProp->valueFunction = []()
+    { return "false"; };
 
     d->introduce();
 
@@ -94,8 +99,8 @@ static void test_homie()
 
     d->setLifecycleState(homie::READY);
 
-    d->mac = "eeddccbb";
-    d->localIp = "8.8.8.8";
+    d->setMac("eeddccbb");
+    d->setLocalIp("8.8.8.8");
 
     d->introduce();
 
