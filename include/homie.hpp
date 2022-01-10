@@ -17,6 +17,8 @@ template <typename T> std::string to_string(const T &t) {
   return stm.str();
 }
 
+std::string f2s(float f);
+
 std::string formatMac(std::string mac);
 
 float to_fahrenheit(float celsius);

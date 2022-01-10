@@ -38,4 +38,10 @@ float to_fahrenheit(float celsius) {
   celsius += 32.0f;
   return celsius;
 }
+
+std::string f2s(float f) {
+  char buf[10];
+  sprintf(buf, "%7.1f", f);
+  return std::string(buf);
+}
 } // namespace homie
