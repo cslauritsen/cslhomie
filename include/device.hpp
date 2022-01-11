@@ -32,6 +32,7 @@ protected:
   Property *wifiSignalProp;
   Property *localIpProp;
   Property *macProp;
+  std::vector<std::string> topicElements;
 
 public:
   Device(std::string aid, std::string aVersion, std::string aname,
@@ -39,6 +40,8 @@ public:
   virtual ~Device();
 
   virtual void publish(Message);
+  virtual void subscribe(std::string commandTopic);
+  void onMessage(Message);
 
   void setLocalIp(std::string s) { this->localIp = s; }
   std::string getLocalIp() { return this->localIp; }

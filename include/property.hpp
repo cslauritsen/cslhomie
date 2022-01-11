@@ -46,7 +46,14 @@ public:
    * @brief A function that gets ths property's value as a string.
    *
    */
-  std::function<std::string(void)> valueFunction;
+  std::function<std::string(void)> readerFunc;
+
+  /**
+   * @brief A function that accepts a string value and does something with the
+   * hardware in response. Only called when settable==true.
+   *
+   */
+  std::optional<std::function<void(std::string)>> writerFunc;
 
   std::string getId() { return id; }
   std::string getName() { return name; }
@@ -65,6 +72,8 @@ public:
 
   bool getRetained() { return retained; }
   void setRetained(bool b) { retained = b; }
+
+  bool isSettable() { return settable; }
 
   Node *getNode() { return node; }
 

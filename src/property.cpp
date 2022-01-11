@@ -37,7 +37,7 @@ void Property::introduce() {
 }
 
 void Property::publish(int qos) {
-  Message m(this->getPubTopic(), this->valueFunction(), qos, this->retained);
+  Message m(this->getPubTopic(), this->readerFunc(), qos, this->retained);
   this->node->getDevice()->publish(m);
 }
 

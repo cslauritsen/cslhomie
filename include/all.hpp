@@ -6,8 +6,8 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include <tuple>
 #include <vector>
+#include <optional>
 
 #ifndef NO_MBEDTLS
 extern "C" {

@@ -22,20 +22,18 @@ Device::Device(std::string aid, std::string aVersion, std::string aname,
   this->wifiNode = new Node(this, NODE_NM_WIFI, "WiFi", "WIFI");
   this->rssiProp =
       new Property(this->wifiNode, PROP_NM_RSSI, "RSSI", homie::INTEGER, false);
-  this->rssiProp->valueFunction = [this]() {
-    return to_string(this->getRssi());
-  };
+  this->rssiProp->readerFunc = [this]() { return to_string(this->getRssi()); };
   this->wifiSignalProp = new Property(this->wifiNode, PROP_NM_WIFI_SIGNAL,
                                       "Wifi Signal", homie::INTEGER, false);
-  this->wifiSignalProp->valueFunction = [this]() {
+  this->wifiSignalProp->readerFunc = [this]() {
     return to_string(this->getWifiSignalStrength());
   };
   this->localIpProp =
       new Property(this->wifiNode, "localip", "Local IP", homie::STRING, false);
-  this->localIpProp->valueFunction = [this]() { return this->localIp; };
+  this->localIpProp->readerFunc = [this]() { return this->localIp; };
   this->macProp =
       new Property(this->wifiNode, "mac", "MAC Address", homie::STRING, false);
-  this->macProp->valueFunction = [this]() { return formatMac(this->mac); };
+  this->macProp->readerFunc = [this]() { return formatMac(this->mac); };
 }
 
 void Device::publishWifi() {
@@ -73,8 +71,8 @@ void Device::introduce() {
   this->publish(Message(topicBase + "$extensions", exts));
 
   this->publish(
-      Message(topicBase + "$localip", this->localIpProp->valueFunction()));
-  this->publish(Message(topicBase + "$mac", this->macProp->valueFunction()));
+      Message(topicBase + "$localip", this->localIpProp->readerFunc()));
+  this->publish(Message(topicBase + "$mac", this->macProp->readerFunc()));
   this->publish(Message(topicBase + "$fw/name", id + "-firmware"));
   this->publish(Message(topicBase + "$fw/version", version));
 
@@ -112,6 +110,30 @@ std::string Device::getLifecycleTopic() { return topicBase + "$state"; }
 
 Message Device::getLifecycleMsg() {
   return Message(getLifecycleTopic(), LIFECYCLE_STATES[(int)lifecycleState]);
+}
+
+void Device::onMessage(Message m) {
+  // Extract property and node name from string
+  this->topicElements.clear();
+  split_string(m.topic, "/", this->topicElements);
+  // homie/dev/node/prop/set
+  if (this->topicElements.size() == 5) {
+    auto nodeNm = this->topicElements[2];
+    auto propNm = this->topicElements[3];
+    auto node = this->getNode(nodeNm);
+    auto prop = node->getProperty(propNm);
+    if (!prop->isSettable()) {
+      std::cerr << "Ignoring message for non-settable property: " << propNm
+                << std::endl;
+      return;
+    }
+    prop->setValue(m.payload);
+    prop->writerFunc = [](std::string s) { std::cout << "derp der der " << s << std::endl;};
+    if (prop->writerFunc) {
+      auto f = prop->writerFunc.value();
+      f(m.payload);
+    }
+  }
 }
 
 } // namespace homie

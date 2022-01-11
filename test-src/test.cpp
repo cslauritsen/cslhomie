@@ -5,11 +5,20 @@
 
 #include <time.h>
 
+
+void homie::Device::subscribe(std::string commandTopic) {
+  // normally impl logic to subscribe to "${homieBaseTopic}/+/+/+/set"
+  // but only if there are settable properties
+  // e.g. mgos_mqtt_sub(commandTopic.c_str(), this->subscriptionHandler, this);
+  std::cerr << "NO sub logic needed" << std::endl;
+}
+
 void homie::Device::publish(Message m) {
   std::cout << "Publish topic=" << m.topic << ": " << m.payload
             << " q=" << m.qos << " r=" << m.retained << std::endl;
 }
 
+/*
 static void introduce_cb(void *arg) {
   auto pair = (std::pair<std::vector<homie::Message> *, int> *)arg;
   auto lst = pair->first;
@@ -41,36 +50,38 @@ static void introduce_cb(void *arg) {
     }
   }
 }
+*/
 
 int homie::Device::getRssi() { return -58; }
 
 static void test_homie() {
-  homie::Device *d = new homie::Device(
-      std::string("device123"), std::string("1.2.3"), std::string("My Device"), "holmes");
+  homie::Device *d =
+      new homie::Device(std::string("device123"), std::string("1.2.3"),
+                        std::string("My Device"), "holmes");
 
   homie::Node *dht22Node =
       new homie::Node(d, "dht22", "DHT22 Temp/RH Sensor", "DHT22");
 
   auto tempProp = new homie::Property(
       dht22Node, "tempf", "Temperature in Fahrenheit", homie::FLOAT, false);
-  tempProp->valueFunction = []() { return "72.0"; };
+  tempProp->readerFunc = []() { return "72.0"; };
   tempProp->setUnit(homie::DEGREE_SYMBOL + "F");
 
   auto rhProp = new homie::Property(dht22Node, "rh", "Relative Humidity",
                                     homie::FLOAT, false);
-  rhProp->valueFunction = []() { return "61.0"; };
+  rhProp->readerFunc = []() { return "61.0"; };
   rhProp->setUnit("%");
 
   auto doorNode = new homie::Node(d, "doora", "South Garage Door", "door");
 
   auto openProp = new homie::Property(doorNode, "isopen", "Door Contact",
-                                      homie::ENUM, false);
-  openProp->valueFunction = []() { return "open"; };
+                                      homie::ENUM, true);
+  openProp->readerFunc = []() { return "open"; };
   openProp->setFormat("open,closed");
 
   auto relayProp = new homie::Property(doorNode, "relay", "Door Activator",
                                        homie::INTEGER, true);
-  relayProp->valueFunction = []() { return "false"; };
+  relayProp->readerFunc = []() { return "false"; };
 
   d->introduce();
 
@@ -87,9 +98,12 @@ static void test_homie() {
 
   d->publishWifi();
 
-  delete d;
 
   std::cout << "This lib version: " << homie::LIB_VERSION << std::endl;
+
+  homie::Message testMsg(openProp->getPubTopic() + "/set", "wooga");
+  d->onMessage(testMsg);
+  delete d;
 }
 
 template <typename T> class Wayne {
@@ -120,4 +134,17 @@ int main(int argc, char **argv) {
 
   wdbl.call();
   std::cout << wdbl.getVal() << std::endl;
+
+
+  std::vector<std::string> res;
+  homie::split_string(std::string("a/b/c/d"), "/", res);
+  std::cout << "res.len " << res.size() << std::endl;
+  for (auto a : res) {
+    std::cout << "mem " << a << std::endl;
+  }
+
+  std::cout << "Node: " << res[res.size()-1-1] << " prop: " << res[res.size()-1] << std::endl;
+
+
+
 }

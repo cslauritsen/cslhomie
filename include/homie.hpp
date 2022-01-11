@@ -1,5 +1,5 @@
 #pragma once
-
+#include <vector>
 #include "all.hpp"
 #include "device.hpp"
 #include "enum.hpp"
@@ -22,4 +22,6 @@ std::string f2s(float f);
 std::string formatMac(std::string mac);
 
 float to_fahrenheit(float celsius);
+
+void split_string(std::string s, std::string delimiter, std::vector<std::string> &results);
 } // namespace homie
