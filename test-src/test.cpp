@@ -61,26 +61,26 @@ static void test_homie() {
   homie::Node *dht22Node =
       new homie::Node(d, "dht22", "DHT22 Temp/RH Sensor", "DHT22");
 
-  auto tempProp = new homie::Property(
-      dht22Node, "tempf", "Temperature in Fahrenheit", homie::FLOAT, false);
-  tempProp->readerFunc = []() { return "72.0"; };
+  auto tempProp =
+      new homie::Property(dht22Node, "tempf", "Temperature in Fahrenheit",
+                          homie::FLOAT, false, []() { return "42.0"; });
   tempProp->setUnit(homie::DEGREE_SYMBOL + "F");
 
-  auto rhProp = new homie::Property(dht22Node, "rh", "Relative Humidity",
-                                    homie::FLOAT, false);
-  rhProp->readerFunc = []() { return "61.0"; };
+  auto rhProp =
+      new homie::Property(dht22Node, "rh", "Relative Humidity", homie::FLOAT,
+                          false, []() { return "61.0"; });
   rhProp->setUnit("%");
 
   auto doorNode = new homie::Node(d, "doora", "South Garage Door", "door");
 
-  auto openProp = new homie::Property(doorNode, "isopen", "Door Contact",
-                                      homie::ENUM, true);
-  openProp->readerFunc = []() { return "open"; };
+  auto openProp =
+      new homie::Property(doorNode, "isopen", "Door Contact", homie::ENUM, true,
+                          []() { return "open"; });
   openProp->setFormat("open,closed");
 
-  auto relayProp = new homie::Property(doorNode, "relay", "Door Activator",
-                                       homie::INTEGER, true);
-  relayProp->readerFunc = []() { return "false"; };
+  auto relayProp =
+      new homie::Property(doorNode, "relay", "Door Activator", homie::INTEGER,
+                          true, []() { return "false"; });
 
   d->introduce();
 
@@ -99,8 +99,9 @@ static void test_homie() {
 
   std::cout << "This lib version: " << homie::LIB_VERSION << std::endl;
 
-  openProp->setWriterFunc(
-      [](std::string s) { std::cout << "OPEN derp der der " << s << std::endl; });
+  openProp->setWriterFunc([](std::string s) {
+    std::cout << "OPEN derp der der " << s << std::endl;
+  });
   homie::Message testMsg(openProp->getPubTopic() + "/set", "open");
   d->onMessage(testMsg);
   delete d;

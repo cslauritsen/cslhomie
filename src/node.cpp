@@ -43,4 +43,4 @@ Property *Node::getProperty(std::string nm) {
   return search->second;
 }
 
-}
+} // namespace homie

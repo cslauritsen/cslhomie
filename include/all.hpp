@@ -4,10 +4,10 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <optional>
 
 #ifndef NO_MBEDTLS
 extern "C" {

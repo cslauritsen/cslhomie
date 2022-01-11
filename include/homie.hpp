@@ -1,11 +1,11 @@
 #pragma once
-#include <vector>
 #include "all.hpp"
 #include "device.hpp"
 #include "enum.hpp"
 #include "message.hpp"
 #include "node.hpp"
 #include "property.hpp"
+#include <vector>
 
 namespace homie {
 
@@ -23,5 +23,6 @@ std::string formatMac(std::string mac);
 
 float to_fahrenheit(float celsius);
 
-void split_string(std::string s, std::string delimiter, std::vector<std::string> &results);
+void split_string(std::string s, std::string delimiter,
+                  std::vector<std::string> &results);
 } // namespace homie

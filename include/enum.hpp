@@ -3,7 +3,7 @@
 
 namespace homie {
 
-//extern const std::string LIB_VERSION;
+// extern const std::string LIB_VERSION;
 
 extern const std::string DEGREE_SYMBOL;
 extern const std::string HOMIE_VERSION;

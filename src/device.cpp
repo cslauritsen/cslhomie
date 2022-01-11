@@ -21,19 +21,17 @@ Device::Device(std::string aid, std::string aVersion, std::string aname,
 
   this->wifiNode = new Node(this, NODE_NM_WIFI, "WiFi", "WIFI");
   this->rssiProp =
-      new Property(this->wifiNode, PROP_NM_RSSI, "RSSI", homie::INTEGER, false);
-  this->rssiProp->readerFunc = [this]() { return to_string(this->getRssi()); };
-  this->wifiSignalProp = new Property(this->wifiNode, PROP_NM_WIFI_SIGNAL,
-                                      "Wifi Signal", homie::INTEGER, false);
-  this->wifiSignalProp->readerFunc = [this]() {
-    return to_string(this->getWifiSignalStrength());
-  };
+      new Property(this->wifiNode, PROP_NM_RSSI, "RSSI", homie::INTEGER, false,
+                   [this]() { return to_string(this->getRssi()); });
+  this->wifiSignalProp = new Property(
+      this->wifiNode, PROP_NM_WIFI_SIGNAL, "Wifi Signal", homie::INTEGER, false,
+      [this]() { return to_string(this->getWifiSignalStrength()); });
   this->localIpProp =
-      new Property(this->wifiNode, "localip", "Local IP", homie::STRING, false);
-  this->localIpProp->readerFunc = [this]() { return this->localIp; };
+      new Property(this->wifiNode, "localip", "Local IP", homie::STRING, false,
+                   [this]() { return this->localIp; });
   this->macProp =
-      new Property(this->wifiNode, "mac", "MAC Address", homie::STRING, false);
-  this->macProp->readerFunc = [this]() { return formatMac(this->mac); };
+      new Property(this->wifiNode, "mac", "MAC Address", homie::STRING, false,
+                   [this]() { return formatMac(this->mac); });
 }
 
 void Device::publishWifi() {

@@ -47,7 +47,7 @@ private:
 
 public:
   Property(Node *anode, std::string id, std::string name, DataType dataType,
-           bool settable);
+           bool settable, std::function<std::string(void)> readerFunc);
   virtual ~Property();
 
   /**
@@ -55,7 +55,6 @@ public:
    *
    */
   std::function<std::string(void)> readerFunc;
-
 
   std::string getId() { return id; }
   std::string getName() { return name; }
@@ -82,5 +81,7 @@ public:
 
   void introduce();
   void publish(int qos = 1);
+
+  std::string read();
 };
 } // namespace homie

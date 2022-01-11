@@ -2,7 +2,7 @@
 #include "homie.hpp"
 
 namespace homie {
-  class Property;
+class Property;
 class Node {
 private:
   /** Required unique id of node */

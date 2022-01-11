@@ -1,7 +1,8 @@
 #include "homie.hpp"
 namespace homie {
 Property::Property(Node *anode, std::string aid, std::string aname,
-                   DataType aDataType, bool asettable) {
+                   DataType aDataType, bool asettable,
+                   std::function<std::string(void)> areaderFunc) {
   id = aid;
   name = aname;
   node = anode;
@@ -12,6 +13,7 @@ Property::Property(Node *anode, std::string aid, std::string aname,
   node->addProperty(this);
   this->retained = true;
   this->hasWriterFunc = false;
+  this->readerFunc = areaderFunc;
 }
 
 void Property::introduce() {
@@ -51,6 +53,11 @@ void Property::setValue(std::string v) {
   if (this->settable && this->hasWriterFunc) {
     this->writerFunc(v);
   }
+}
+
+std::string Property::read() {
+  this->setValue(this->readerFunc());
+  return this->getValue();
 }
 
 } // namespace homie

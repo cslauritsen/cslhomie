@@ -1,11 +1,11 @@
 #pragma once
-#include "homie.hpp"
 #include "enum.hpp"
+#include "homie.hpp"
 
 namespace homie {
-  class Node;
-  class Property;
-  class Message;
+class Node;
+class Property;
+class Message;
 
 /**
  * @brief  Models a homie device. A homie device has 0 or many nodes, and  has
@@ -101,4 +101,4 @@ homie / device123 / mythermostat / temperature / $settable → true
   Message getLwt();
   Message getLifecycleMsg();
 };
-}
+} // namespace homie
