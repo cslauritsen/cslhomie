@@ -5,12 +5,11 @@
 
 #include <time.h>
 
-
 void homie::Device::subscribe(std::string commandTopic) {
   // normally impl logic to subscribe to "${homieBaseTopic}/+/+/+/set"
   // but only if there are settable properties
   // e.g. mgos_mqtt_sub(commandTopic.c_str(), this->subscriptionHandler, this);
-  std::cerr << "NO sub logic needed" << std::endl;
+  std::cerr << "NO sub logic needed " << commandTopic << std::endl;
 }
 
 void homie::Device::publish(Message m) {
@@ -98,10 +97,11 @@ static void test_homie() {
 
   d->publishWifi();
 
-
   std::cout << "This lib version: " << homie::LIB_VERSION << std::endl;
 
-  homie::Message testMsg(openProp->getPubTopic() + "/set", "wooga");
+  openProp->setWriterFunc(
+      [](std::string s) { std::cout << "OPEN derp der der " << s << std::endl; });
+  homie::Message testMsg(openProp->getPubTopic() + "/set", "open");
   d->onMessage(testMsg);
   delete d;
 }
@@ -125,7 +125,7 @@ template <typename T> Wayne<T> &Wayne<T>::operator<<(T t) {
   return *this;
 }
 
-int main(int argc, char **argv) {
+int main() {
   test_homie();
   Wayne<time_t> wdbl;
 
@@ -135,7 +135,6 @@ int main(int argc, char **argv) {
   wdbl.call();
   std::cout << wdbl.getVal() << std::endl;
 
-
   std::vector<std::string> res;
   homie::split_string(std::string("a/b/c/d"), "/", res);
   std::cout << "res.len " << res.size() << std::endl;
@@ -143,8 +142,6 @@ int main(int argc, char **argv) {
     std::cout << "mem " << a << std::endl;
   }
 
-  std::cout << "Node: " << res[res.size()-1-1] << " prop: " << res[res.size()-1] << std::endl;
-
-
-
+  std::cout << "Node: " << res[res.size() - 1 - 1]
+            << " prop: " << res[res.size() - 1] << std::endl;
 }

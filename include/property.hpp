@@ -34,6 +34,14 @@ private:
   std::string unit;
   std::string value;
 
+  /**
+   * @brief A function that accepts a string value and does something with the
+   * hardware in response. Only called when settable==true.
+   *
+   */
+  std::function<void(std::string)> writerFunc;
+  bool hasWriterFunc;
+
   /** Node owning this property */
   Node *node;
 
@@ -48,12 +56,6 @@ public:
    */
   std::function<std::string(void)> readerFunc;
 
-  /**
-   * @brief A function that accepts a string value and does something with the
-   * hardware in response. Only called when settable==true.
-   *
-   */
-  std::optional<std::function<void(std::string)>> writerFunc;
 
   std::string getId() { return id; }
   std::string getName() { return name; }
@@ -62,7 +64,8 @@ public:
   std::string getPubTopic() { return pubTopic; }
 
   std::string getValue() { return value; }
-  void setValue(std::string v) { this->value = v; }
+  void setValue(std::string v);
+  void setWriterFunc(std::function<void(std::string)>);
 
   std::string getFormat() { return format; }
   void setFormat(std::string f) { this->format = f; }

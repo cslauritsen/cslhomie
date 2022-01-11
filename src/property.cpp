@@ -11,6 +11,7 @@ Property::Property(Node *anode, std::string aid, std::string aname,
   subTopic = node->getTopicBase() + this->id + "/set";
   node->addProperty(this);
   this->retained = true;
+  this->hasWriterFunc = false;
 }
 
 void Property::introduce() {
@@ -40,5 +41,16 @@ void Property::publish(int qos) {
   Message m(this->getPubTopic(), this->readerFunc(), qos, this->retained);
   this->node->getDevice()->publish(m);
 }
-
+void Property::setWriterFunc(std::function<void(std::string)> f) {
+  this->writerFunc = f;
+  this->hasWriterFunc = true;
 }
+
+void Property::setValue(std::string v) {
+  this->value = v;
+  if (this->settable && this->hasWriterFunc) {
+    this->writerFunc(v);
+  }
+}
+
+} // namespace homie

@@ -34,8 +34,6 @@ std::string to_string(bool v) { return std::string(v ? "true" : "false"); }
 
 void split_string(std::string s, std::string delimiter,
                   std::vector<std::string> &res) {
-
-  // for string delimiter
   size_t pos_start = 0, pos_end, delim_len = delimiter.length();
   std::string token;
 

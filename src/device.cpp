@@ -50,6 +50,7 @@ Node *Device::getNode(std::string nm) {
   }
   return search->second;
 }
+
 void Device::introduce() {
   int i;
   this->publish(Message(topicBase + "$homie", HOMIE_VERSION));
@@ -128,11 +129,6 @@ void Device::onMessage(Message m) {
       return;
     }
     prop->setValue(m.payload);
-    prop->writerFunc = [](std::string s) { std::cout << "derp der der " << s << std::endl;};
-    if (prop->writerFunc) {
-      auto f = prop->writerFunc.value();
-      f(m.payload);
-    }
   }
 }
 

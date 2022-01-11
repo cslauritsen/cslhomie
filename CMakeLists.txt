@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 include_directories(include)
 add_definitions(-DNO_MBEDTLS)
-
+add_compile_options(-Wall -pedantic -Werror -Wextra -Oz)
 add_executable(test_prog 
     test-src/test.cpp src/homie.cpp 
     test-src/dtor.cpp test-src/net.cpp src/device.cpp 
