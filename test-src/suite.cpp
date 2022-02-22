@@ -1,73 +1,73 @@
-#include <gtest/gtest.h>
 #include "homie.hpp"
+#include <gtest/gtest.h>
 #include <list>
 #include <string>
 
-// Demonstrate some basic assertions.
-TEST(HelloTest, BasicAssertions) {
-  // Expect two strings not to be equal.
-  EXPECT_STRNE("hello", "world");
-  // Expect equality.
-  EXPECT_EQ(7 * 6, 42);
-}
+class PropertyTest : public ::testing::Test {
+protected:
+  void SetUp() override {
+    d = new homie::Device("unittest", "1.0", "unittest");
+    n = new homie::Node(d, "node1", "Node1", "generic");
+    p = new homie::Property(n, "prop1", "Prop1", homie::INTEGER, isWritable(),
+                            []() { return "s1"; });
+    p->setWriterFunc([this](std::string s) { this->capture.push_back(s); });
+  }
+
+  void TearDown() override { delete d; }
+
+  virtual bool isWritable() { return false; }
+
+  homie::Device *d;
+  homie::Node *n;
+  homie::Property *p;
+  std::list<std::string> capture;
+};
+
+class WritablePropertyTest : public PropertyTest {
+protected:
+  bool isWritable() override { return true; }
+};
 
 TEST(HomieSuite, ToFahrenheit) {
   ASSERT_FLOAT_EQ(homie::to_fahrenheit(28.0), 82.4);
 }
 
-TEST(HomieSuite, DeviceHasNode) {
-    homie::Device *d = new homie::Device("unittest", "1.0", "unittest");
-    homie::Node *n = new homie::Node(d, "node1", "Node1", "generic");
-    EXPECT_TRUE(d->getNode("node1") == n);
-    delete d;
+TEST_F(WritablePropertyTest, NodeIsPresent) {
+  EXPECT_TRUE(d->getNode("node1") == n);
 }
 
-TEST(HomieSuite, NodeHasProperty) {
-    homie::Device *d = new homie::Device("unittest", "1.0", "unittest");
-    homie::Node *n = new homie::Node(d, "node1", "Node1", "generic");
-    homie::Property *p = new homie::Property(n, "prop1", "Prop1", homie::INTEGER, false, [](){ return "s1"; } );
-    EXPECT_TRUE(n->getProperty("prop1") == p);
-    delete d;
+TEST_F(PropertyTest, PropertyIsPresent) {
+  EXPECT_TRUE(n->getProperty("prop1") == p);
 }
 
-TEST(HomieSuite, NodeReadValue) {
-    homie::Device *d = new homie::Device("unittest", "1.0", "unittest");
-    homie::Node *n = new homie::Node(d, "node1", "Node1", "generic");
-    homie::Property *p = new homie::Property(n, "prop1", "Prop1", homie::INTEGER, false, [](){ return "s1"; } );
-    EXPECT_FALSE(p->isSettable());
-    EXPECT_EQ("s1", p->read());
-    delete d;
+TEST_F(PropertyTest, PropertyIsRead) {
+  EXPECT_FALSE(p->isSettable());
+  EXPECT_EQ("s1", p->read());
 }
 
-TEST(HomieSuite, SettableNodeWritesValue) {
-    homie::Device *d = new homie::Device("unittest", "1.0", "unittest");
-    homie::Node *n = new homie::Node(d, "node1", "Node1", "generic");
-    homie::Property *p = new homie::Property(n, "prop1", "Prop1", homie::INTEGER, true, [](){ return "s1"; } );
-    std::list<std::string> capture;
-    p->setWriterFunc([&capture](std::string s) { capture.push_back(s); });
-    EXPECT_TRUE(p->isSettable());
-    EXPECT_EQ("s1", p->read());
-    EXPECT_EQ(1, capture.size());
-    p->setValue("wooga");
-    EXPECT_EQ(2, capture.size());
-    auto iter = capture.begin();
-    EXPECT_EQ("s1",  *iter++);
-    EXPECT_EQ("wooga",  *iter++);
-    delete d;
+TEST_F(WritablePropertyTest, WritablePropertyWritesValue) {
+  EXPECT_TRUE(p->isSettable());
+  EXPECT_EQ("s1", p->read());
+  EXPECT_EQ(1, capture.size())
+      << "Captured writes should have 1 member from read()";
+  p->setValue("wooga");
+  EXPECT_EQ(2, capture.size())
+      << "Captured writes should have 2 members after setValue()";
+  auto iter = capture.begin();
+  EXPECT_EQ("s1", *iter++)
+      << "Captured writes first member should be from read()";
+  EXPECT_EQ("wooga", *iter++)
+      << "Capture writes second member should be from setValue()";
 }
 
-TEST(HomieSuite, NonSettableNodeIgnoresWriterFunc) {
-    homie::Device *d = new homie::Device("unittest", "1.0", "unittest");
-    homie::Node *n = new homie::Node(d, "node1", "Node1", "generic");
-    homie::Property *p = new homie::Property(n, "prop1", "Prop1", homie::INTEGER, false, [](){ return "s1"; } );
-    std::list<std::string> capture;
-    p->setWriterFunc([&capture](std::string s) { capture.push_back(s); });
-    EXPECT_FALSE(p->isSettable());
-    EXPECT_EQ("s1", p->read());
-    EXPECT_EQ(0, capture.size());
-    p->setValue("wooga");
-    EXPECT_EQ(0, capture.size());
-    auto iter = capture.begin();
-    EXPECT_EQ(iter, capture.end());
-    delete d;
+TEST_F(PropertyTest, NonWritablePropertyIgnoresWriterFunc) {
+  EXPECT_FALSE(p->isSettable());
+  EXPECT_EQ("s1", p->read());
+  EXPECT_EQ(0, this->capture.size()) << "Captured writes list should be empty";
+  p->setValue("wooga");
+  EXPECT_EQ(0, this->capture.size())
+      << "Captured writes list should be empty, even after setValue()";
+  auto iter = this->capture.begin();
+  EXPECT_EQ(iter, this->capture.end())
+      << "Captured writes list should not iterate";
 }
