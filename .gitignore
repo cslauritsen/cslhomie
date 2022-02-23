@@ -8,3 +8,5 @@ linux64
 macos
 *.zip
 *.a
+CMakeCache.txt
+.DS_Store
