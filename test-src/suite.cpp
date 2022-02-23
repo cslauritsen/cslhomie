@@ -5,10 +5,14 @@
 #include <string>
 #include <string>
 
+using Msg = homie::Message;
 class TestDevice : public homie::Device {
 public:
   TestDevice() : homie::Device("testdevice", "1.0", "TestDevice") {}
   std::list<homie::Message> publications;
+  int rssi = -58;
+
+  int getRssi() override { return rssi; }
 
 protected:
   void publish(homie::Message m) override {
@@ -132,7 +136,6 @@ TEST_F(PropertyTest, PropertyIntroduceUnit) {
       << "There should be one and only one $unit topic emitted.";
 }
 
-using Msg = homie::Message;
 TEST_F(PropertyTest, PropertyIntroduceFormat) {
   p->setFormat("1:9");
   p->introduce();
@@ -181,4 +184,24 @@ TEST_F(PropertyTest, NodeMultiplePropertyIntroduction) {
       << "only one $properties message should be published";
   EXPECT_EQ(1, count2)
       << "single comma in properties";
+}
+
+TEST_F(PropertyTest, WifiSignalStrength) {
+  d->rssi = -100;
+  EXPECT_EQ(0, d->getWifiSignalStrength());
+
+  d->rssi = -49;
+  EXPECT_EQ(100, d->getWifiSignalStrength());
+
+  d->rssi = -58;
+  EXPECT_EQ(84, d->getWifiSignalStrength());
+  d->introduce();
+}
+
+TEST_F(PropertyTest, PublishWifi) {
+  d->rssi = -49;// -> signal strength "100"
+  d->publishWifi();
+  std::for_each(d->publications.begin(), d->publications.end(), [](Msg m) { std::cout << m.topic << ": " << m.payload << std::endl; });
+  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(), [this](Msg m){ return m.topic.find(homie::PROP_NM_RSSI) != std::string::npos && m.payload == std::to_string(this->d->rssi); }));
+  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(), [](Msg m){ return m.topic.find("/signal") != std::string::npos && m.payload == "100"; }));
 }
