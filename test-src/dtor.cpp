@@ -10,12 +10,14 @@ homie::Device::~Device() {
 }
 
 homie::Node::~Node() {
-  if (dtor_debug) std::cerr << " . Deleting node " << this->id << std::endl;
+  if (dtor_debug)
+    std::cerr << " . Deleting node " << this->id << std::endl;
   for (auto prop : this->properties) {
     delete prop.second;
   }
 }
 
 homie::Property::~Property() {
-  if (dtor_debug) std::cerr << " .   Deleting prop " << this->id << std::endl;
+  if (dtor_debug)
+    std::cerr << " .   Deleting prop " << this->id << std::endl;
 }

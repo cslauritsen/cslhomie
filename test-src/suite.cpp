@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 #include <list>
 #include <string>
-#include <string>
 
 using Msg = homie::Message;
 class TestDevice : public homie::Device {
@@ -72,7 +71,7 @@ TEST(HomieSuite, splitString) {
 }
 
 TEST(HomieSuite, f2s) {
-    float f = 1.22222;
+  float f = 1.22222;
   auto x = homie::f2s(f);
   ASSERT_EQ("1.2", x) << f << " % %.1f => 100";
 }
@@ -161,32 +160,32 @@ TEST_F(PropertyTest, NodePropertyNotFound) {
 
 TEST_F(PropertyTest, NodeSinglePropertyIntroduction) {
   n->introduce();
-  auto count = std::count_if(d->publications.begin(), d->publications.end(), [](Msg m) {
-    return m.topic.find("$properties") != std::string::npos;
-  });
-  auto count2 = std::count_if(d->publications.begin(), d->publications.end(), [](Msg m) {
-    return m.payload.find(",") != std::string::npos;
-  });
-  EXPECT_EQ(1, count)
-      << "only one $properties message should be published";
-  EXPECT_EQ(0, count2)
-      << "no commas in single properties";
+  auto count =
+      std::count_if(d->publications.begin(), d->publications.end(), [](Msg m) {
+        return m.topic.find("$properties") != std::string::npos;
+      });
+  auto count2 =
+      std::count_if(d->publications.begin(), d->publications.end(), [](Msg m) {
+        return m.payload.find(",") != std::string::npos;
+      });
+  EXPECT_EQ(1, count) << "only one $properties message should be published";
+  EXPECT_EQ(0, count2) << "no commas in single properties";
 }
 
 TEST_F(PropertyTest, NodeMultiplePropertyIntroduction) {
   new homie::Property(n, "prop2", "Prop2", homie::INTEGER, isWritable(),
-                            []() { return "s2"; });
+                      []() { return "s2"; });
   n->introduce();
-  auto count = std::count_if(d->publications.begin(), d->publications.end(), [](Msg m) {
-    return m.topic.find("$properties") != std::string::npos;
-  });
-  auto count2 = std::count_if(d->publications.begin(), d->publications.end(), [](Msg m) {
-    return m.payload.find(",") != std::string::npos;
-  });
-  EXPECT_EQ(1, count)
-      << "only one $properties message should be published";
-  EXPECT_EQ(1, count2)
-      << "single comma in properties";
+  auto count =
+      std::count_if(d->publications.begin(), d->publications.end(), [](Msg m) {
+        return m.topic.find("$properties") != std::string::npos;
+      });
+  auto count2 =
+      std::count_if(d->publications.begin(), d->publications.end(), [](Msg m) {
+        return m.payload.find(",") != std::string::npos;
+      });
+  EXPECT_EQ(1, count) << "only one $properties message should be published";
+  EXPECT_EQ(1, count2) << "single comma in properties";
 }
 
 TEST_F(PropertyTest, WifiSignalStrength) {
@@ -202,22 +201,42 @@ TEST_F(PropertyTest, WifiSignalStrength) {
 }
 
 TEST_F(PropertyTest, PublishWifi) {
-  d->rssi = -49;// -> signal strength "100"
+  d->rssi = -49; // -> signal strength "100"
   d->publishWifi();
-  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(), [this](Msg m){ return m.topic.find(homie::PROP_NM_RSSI) != std::string::npos && m.payload == std::to_string(this->d->rssi); }));
-  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(), [](Msg m){ return m.topic.find("/signal") != std::string::npos && m.payload == "100"; }));
+  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(),
+                             [this](Msg m) {
+                               return m.topic.find(homie::PROP_NM_RSSI) !=
+                                          std::string::npos &&
+                                      m.payload ==
+                                          std::to_string(this->d->rssi);
+                             }));
+  EXPECT_EQ(1, std::count_if(
+                   d->publications.begin(), d->publications.end(), [](Msg m) {
+                     return m.topic.find("/signal") != std::string::npos &&
+                            m.payload == "100";
+                   }));
 }
 
 TEST_F(PropertyTest, PublishLocalIp) {
   d->setLocalIp("1.2.3.4");
   d->introduce();
-  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(), [this](Msg m){ return m.topic.find("/localip") != std::string::npos && m.payload == this->d->getLocalIp(); }));
+  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(),
+                             [this](Msg m) {
+                               return m.topic.find("/localip") !=
+                                          std::string::npos &&
+                                      m.payload == this->d->getLocalIp();
+                             }));
 }
 
 TEST_F(PropertyTest, PublishMac) {
   d->setMac("fe:ed:fa:ce:de:ad");
   d->introduce();
-  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(), [this](Msg m){ return m.topic.find("/mac") != std::string::npos && m.payload == this->d->getMac(); }));
+  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(),
+                             [this](Msg m) {
+                               return m.topic.find("/mac") !=
+                                          std::string::npos &&
+                                      m.payload == this->d->getMac();
+                             }));
 }
 
 TEST_F(WritablePropertyTest, CheckSubTopic) {
@@ -228,18 +247,20 @@ TEST_F(PropertyTest, CheckMissingNodeReturnsNullPtr) {
   EXPECT_EQ(nullptr, d->getNode("fjdfkdlkff0dfj00-0l"));
 }
 
-TEST_F(PropertyTest, CheckLwtIsLost) {
-  EXPECT_EQ("lost", d->getLwt().payload);
-}
+TEST_F(PropertyTest, CheckLwtIsLost) { EXPECT_EQ("lost", d->getLwt().payload); }
 
 TEST_F(WritablePropertyTest, CheckInputMessage) {
-  auto inputMsg = Msg("homie/" + d->getId() + "/" + n->getId() + "/" + p->getId() + "/set", "awesome new value");
+  auto inputMsg =
+      Msg("homie/" + d->getId() + "/" + n->getId() + "/" + p->getId() + "/set",
+          "awesome new value");
   d->onMessage(inputMsg);
   EXPECT_EQ(inputMsg.payload, p->getValue());
 }
 
 TEST_F(PropertyTest, InputMessageIgnoredForNonWritableProperty) {
-  auto inputMsg = Msg("homie/" + d->getId() + "/" + n->getId() + "/" + p->getId() + "/set", "woo-hoo");
+  auto inputMsg =
+      Msg("homie/" + d->getId() + "/" + n->getId() + "/" + p->getId() + "/set",
+          "woo-hoo");
   p->setValue("previous");
   d->onMessage(inputMsg);
   EXPECT_EQ("previous", p->getValue());
