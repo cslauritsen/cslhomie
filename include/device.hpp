@@ -43,6 +43,8 @@ public:
   virtual void subscribe(std::string commandTopic);
   void onMessage(Message);
 
+  std::string getId() { return id; }
+
   void setLocalIp(std::string s) { this->localIp = s; }
   std::string getLocalIp() { return this->localIp; }
 

@@ -8,11 +8,14 @@
 using Msg = homie::Message;
 class TestDevice : public homie::Device {
 public:
-  TestDevice() : homie::Device("testdevice", "1.0", "TestDevice") {}
+  TestDevice() : homie::Device("testdevice", "1.0", "TestDevice") {
+    extensions.push_back("com.planetlauritsen.test:0.0.1:[4.x]");
+  }
   std::list<homie::Message> publications;
   int rssi = -58;
 
   int getRssi() override { return rssi; }
+  std::vector<std::string> getExtensions() { return extensions; }
 
 protected:
   void publish(homie::Message m) override {
@@ -201,7 +204,47 @@ TEST_F(PropertyTest, WifiSignalStrength) {
 TEST_F(PropertyTest, PublishWifi) {
   d->rssi = -49;// -> signal strength "100"
   d->publishWifi();
-  std::for_each(d->publications.begin(), d->publications.end(), [](Msg m) { std::cout << m.topic << ": " << m.payload << std::endl; });
   EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(), [this](Msg m){ return m.topic.find(homie::PROP_NM_RSSI) != std::string::npos && m.payload == std::to_string(this->d->rssi); }));
   EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(), [](Msg m){ return m.topic.find("/signal") != std::string::npos && m.payload == "100"; }));
+}
+
+TEST_F(PropertyTest, PublishLocalIp) {
+  d->setLocalIp("1.2.3.4");
+  d->introduce();
+  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(), [this](Msg m){ return m.topic.find("/localip") != std::string::npos && m.payload == this->d->getLocalIp(); }));
+}
+
+TEST_F(PropertyTest, PublishMac) {
+  d->setMac("fe:ed:fa:ce:de:ad");
+  d->introduce();
+  EXPECT_EQ(1, std::count_if(d->publications.begin(), d->publications.end(), [this](Msg m){ return m.topic.find("/mac") != std::string::npos && m.payload == this->d->getMac(); }));
+}
+
+TEST_F(WritablePropertyTest, CheckSubTopic) {
+  EXPECT_EQ(p->getPubTopic() + "/set", p->getSubTopic());
+}
+
+TEST_F(PropertyTest, CheckMissingNodeReturnsNullPtr) {
+  EXPECT_EQ(nullptr, d->getNode("fjdfkdlkff0dfj00-0l"));
+}
+
+TEST_F(PropertyTest, CheckLwtIsLost) {
+  EXPECT_EQ("lost", d->getLwt().payload);
+}
+
+TEST_F(WritablePropertyTest, CheckInputMessage) {
+  auto inputMsg = Msg("homie/" + d->getId() + "/" + n->getId() + "/" + p->getId() + "/set", "awesome new value");
+  d->onMessage(inputMsg);
+  EXPECT_EQ(inputMsg.payload, p->getValue());
+}
+
+TEST_F(PropertyTest, InputMessageIgnoredForNonWritableProperty) {
+  auto inputMsg = Msg("homie/" + d->getId() + "/" + n->getId() + "/" + p->getId() + "/set", "woo-hoo");
+  p->setValue("previous");
+  d->onMessage(inputMsg);
+  EXPECT_EQ("previous", p->getValue());
+}
+
+TEST_F(PropertyTest, CheckExtensions) {
+  EXPECT_EQ(2, d->getExtensions().size());
 }

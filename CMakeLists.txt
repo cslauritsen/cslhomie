@@ -25,10 +25,6 @@ add_compile_options(-Wall -pedantic -Werror -Wextra -Oz)
 add_link_options(-fprofile-instr-generate)
 add_compile_options(-fprofile-arcs -ftest-coverage -g -O0)
 
-add_executable(test_prog 
-    test-src/test.cpp src/homie.cpp 
-    test-src/dtor.cpp test-src/net.cpp src/device.cpp 
-    src/property.cpp src/node.cpp src/message.cpp)
 add_executable(suite
     test-src/suite.cpp src/homie.cpp 
     test-src/dtor.cpp test-src/net.cpp src/device.cpp 
