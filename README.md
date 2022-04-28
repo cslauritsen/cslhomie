@@ -14,7 +14,7 @@ This requires C++ and its standard template libs. It was designed for my Mongoos
 # Usage
 Create a `homie::Device` object, add `homie::Node` objects to the device, and add `homie::Property` objects to the node. Call `homie::Device::introduce` to build a comprehensive list of messages that you'll want to publish initially. 
 
-Have a look at some [sample code](test-src/test.cpp).
+Have a look at the [unit tests](test-src/suite.cpp).
 
 # Contributing
 Feel free to make pull requests. You can get faster turnaround by building and testing locally with `cmake` :
